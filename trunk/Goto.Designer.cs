@@ -59,6 +59,8 @@
             this.Controls.Add(this.tbGoto);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "dlgGoto";
+            this.ShowInTaskbar = false;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Goto";
             this.ResumeLayout(false);
             this.PerformLayout();

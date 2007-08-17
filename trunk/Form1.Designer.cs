@@ -43,12 +43,12 @@ namespace MyProj
             this.cbH = new System.Windows.Forms.CheckBox();
             this.cbC = new System.Windows.Forms.CheckBox();
             this.hexBox1 = new Be.Windows.Forms.HexBox();
-            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.contextMHex = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.goToToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.statusStrip1.SuspendLayout();
+            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.contextMHex.SuspendLayout();
+            this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // button1
@@ -200,6 +200,21 @@ namespace MyProj
             this.hexBox1.CurrentPositionInLineChanged += new System.EventHandler(this.PositionChanged);
             this.hexBox1.CurrentLineChanged += new System.EventHandler(this.PositionChanged);
             // 
+            // contextMHex
+            // 
+            this.contextMHex.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.goToToolStripMenuItem});
+            this.contextMHex.Name = "contextMHex";
+            this.contextMHex.Size = new System.Drawing.Size(166, 48);
+            // 
+            // goToToolStripMenuItem
+            // 
+            this.goToToolStripMenuItem.Name = "goToToolStripMenuItem";
+            this.goToToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.G)));
+            this.goToToolStripMenuItem.Size = new System.Drawing.Size(165, 22);
+            this.goToToolStripMenuItem.Text = "Go to ...";
+            this.goToToolStripMenuItem.Click += new System.EventHandler(this.goToToolStripMenuItem_Click);
+            // 
             // statusStrip1
             // 
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -215,20 +230,6 @@ namespace MyProj
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
             this.toolStripStatusLabel1.Size = new System.Drawing.Size(109, 17);
             this.toolStripStatusLabel1.Text = "toolStripStatusLabel1";
-            // 
-            // contextMHex
-            // 
-            this.contextMHex.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.goToToolStripMenuItem});
-            this.contextMHex.Name = "contextMHex";
-            this.contextMHex.Size = new System.Drawing.Size(127, 26);
-            // 
-            // goToToolStripMenuItem
-            // 
-            this.goToToolStripMenuItem.Name = "goToToolStripMenuItem";
-            this.goToToolStripMenuItem.Size = new System.Drawing.Size(126, 22);
-            this.goToToolStripMenuItem.Text = "Go to ...";
-            this.goToToolStripMenuItem.Click += new System.EventHandler(this.goToToolStripMenuItem_Click);
             // 
             // Form1
             // 
@@ -252,9 +253,9 @@ namespace MyProj
             this.Controls.Add(this.button1);
             this.Name = "Form1";
             this.Text = "Main";
+            this.contextMHex.ResumeLayout(false);
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
-            this.contextMHex.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
