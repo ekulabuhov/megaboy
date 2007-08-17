@@ -9,3 +9,4 @@ C:\Documents and Settings\Evg\My Documents\Visual Studio 2005\Projects\MyProj\My
 C:\Documents and Settings\Evg\My Documents\Visual Studio 2005\Projects\MyProj\MyProj\bin\Debug\Interop.stdole.dll
 C:\Documents and Settings\Evg\My Documents\Visual Studio 2005\Projects\MyProj\MyProj\obj\Debug\Interop.stdole.dll
 C:\Documents and Settings\Evg\My Documents\Visual Studio 2005\Projects\MyProj\MyProj\obj\Debug\MyProj.csproj.ResolveComReference.cache
+C:\Documents and Settings\Evg\My Documents\Visual Studio 2005\Projects\MyProj\MyProj\obj\Debug\MyProj.dlgGoto.resources
