@@ -28,6 +28,7 @@ namespace MyProj
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.button1 = new System.Windows.Forms.Button();
             this.lAF = new System.Windows.Forms.Label();
             this.lBC = new System.Windows.Forms.Label();
@@ -44,7 +45,10 @@ namespace MyProj
             this.hexBox1 = new Be.Windows.Forms.HexBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.contextMHex = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.goToToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1.SuspendLayout();
+            this.contextMHex.SuspendLayout();
             this.SuspendLayout();
             // 
             // button1
@@ -129,6 +133,7 @@ namespace MyProj
             // lInstr
             // 
             this.lInstr.AutoSize = true;
+            this.lInstr.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lInstr.Location = new System.Drawing.Point(12, 22);
             this.lInstr.Name = "lInstr";
             this.lInstr.Size = new System.Drawing.Size(31, 13);
@@ -179,6 +184,7 @@ namespace MyProj
             // hexBox1
             // 
             this.hexBox1.BytesPerLine = 8;
+            this.hexBox1.ContextMenuStrip = this.contextMHex;
             this.hexBox1.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.hexBox1.LineInfoVisible = true;
             this.hexBox1.Location = new System.Drawing.Point(12, 220);
@@ -210,6 +216,20 @@ namespace MyProj
             this.toolStripStatusLabel1.Size = new System.Drawing.Size(109, 17);
             this.toolStripStatusLabel1.Text = "toolStripStatusLabel1";
             // 
+            // contextMHex
+            // 
+            this.contextMHex.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.goToToolStripMenuItem});
+            this.contextMHex.Name = "contextMHex";
+            this.contextMHex.Size = new System.Drawing.Size(127, 26);
+            // 
+            // goToToolStripMenuItem
+            // 
+            this.goToToolStripMenuItem.Name = "goToToolStripMenuItem";
+            this.goToToolStripMenuItem.Size = new System.Drawing.Size(126, 22);
+            this.goToToolStripMenuItem.Text = "Go to ...";
+            this.goToToolStripMenuItem.Click += new System.EventHandler(this.goToToolStripMenuItem_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -231,9 +251,10 @@ namespace MyProj
             this.Controls.Add(this.lAF);
             this.Controls.Add(this.button1);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "Main";
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
+            this.contextMHex.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -257,6 +278,8 @@ namespace MyProj
         private Be.Windows.Forms.HexBox hexBox1;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
+        private System.Windows.Forms.ContextMenuStrip contextMHex;
+        private System.Windows.Forms.ToolStripMenuItem goToToolStripMenuItem;
     }
 }
 

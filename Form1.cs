@@ -18,6 +18,7 @@ using System.Collections;
 
 using Be.Windows.Forms;
 
+
 namespace MyProj
 {
     public partial class Form1 : Form
@@ -25,10 +26,11 @@ namespace MyProj
         byte[] rom = new byte[2000];
         byte[] some = new byte[20];
         byte[] RAM1 = new byte[0x1000];
+        byte[] IO = new byte[0x100];
         ushort gb_bc, gb_de, gb_hl, gb_sp, gb_pc;
-        byte instr, gb_a, gb_flgs;
+        byte instr, gb_a, gb_flgs, gb_ime;
         int cycles = 0, autorun = 1;
-        public delegate void smthng();
+        delegate void smthng();
         smthng[] op = new smthng[0xFF];
         Random rnd = new Random(123);
         DynamicByteProvider dynamicbp;
@@ -67,12 +69,11 @@ namespace MyProj
             hexBox1.ByteProvider = dynamicbp;
            // hexBox1.ScrollByteIntoView(0xA0);
             
-            
-            
+                        
             
 
             instr = rom[gb_pc];
-    
+            
    
             op[0] = iNOP;
             op[0xC3] = iC3;
@@ -84,6 +85,9 @@ namespace MyProj
             op[0x05] = i05;
             op[0x0D] = i0D;
             op[0x20] = i20;
+            op[0x3E] = i3E;
+            op[0xF3] = iF3;
+            op[0xE0] = iE0;
             
             UpdateInfo();
               
@@ -131,6 +135,13 @@ namespace MyProj
             gb_bc |= (ushort)(rom[++gb_pc] << 8);
             gb_pc++;
         }
+
+        void i3E()  // LD A,#nn     8 ---- r=n
+        {
+            gb_a = rom[++gb_pc];
+            gb_pc++;
+        }
+
 
         void i32()  // LDD (HL),A	8 ---- (HL)=A, HL=HL-1
         {
@@ -180,20 +191,33 @@ namespace MyProj
             gb_pc+=2;
         }
 
+        void iF3()  // DI           4 ---- disable interrupts, IME=0
+        {
+            gb_ime = 0;
+            gb_pc++;
+        }
 
+        void iE0()  // LD (FFnn),A  12 ---- write to io-port n (memory FF00+n)
+        {
+            writemem((ushort)(0xFF00 + rom[++gb_pc]), gb_a);
+            gb_pc++;
+        }
 
+        // No else if`s please... Use switch instead?
         void writemem(ushort addr, byte value)
         {
             int map = addr >> 12;
             
-            if ((map > 0) && (map < 4))
+            switch(map)
             {
-            }
-            else if (map == 0xD)
-            {
-                RAM1[addr & 0xFFF] = value;
-                dynamicbp.WriteByte(addr & 0xFFF, value);
-                hexBox1.Refresh();
+                case 0xD:       // RAM1
+                    RAM1[addr & 0xFFF] = value;
+                    dynamicbp.WriteByte(addr & 0xFFF, value);
+                    if (autorun==0) hexBox1.Refresh();
+                    break;
+                case 0xF:       // I/O
+                    IO[addr & 0xFF] = value;
+                    break;
             }
         }
 
@@ -207,7 +231,9 @@ namespace MyProj
             lHL.Text = "HL = " + gb_hl.ToString("X4");
             lSP.Text = "SP = " + gb_sp.ToString("X4");
             lPC.Text = "PC = " + gb_pc.ToString("X4");
-            lInstr.Text = "op = " + instr.ToString("X2");
+            lInstr.Text = "op = " + instr.ToString("X2") +
+                rom[gb_pc + 1].ToString("X2") + rom[gb_pc + 2].ToString("X2") +
+                "; " + AsmDisc(instr);
             cbZ.Checked = ((gb_flgs & zF) > 0);
             cbN.Checked = ((gb_flgs & nF) > 0);
             cbH.Checked = ((gb_flgs & hcarryF) > 0);
@@ -227,14 +253,11 @@ namespace MyProj
 
         private void button1_Click(object sender, EventArgs e)
         {
-            while (autorun == 1)
+            do
             {
                 op[instr]();
                 instr = rom[gb_pc];
-                UpdateInfo();
-            }
-            op[instr]();
-            instr = rom[gb_pc];
+            } while (autorun == 1);
             UpdateInfo();
         }
 
@@ -244,6 +267,14 @@ namespace MyProj
             toolStripStatusLabel1.Text = string.Format("Ln {0}  Col {1} Pos {2:X2}",
                 hexBox1.CurrentLine, hexBox1.CurrentPositionInLine,
                 (hexBox1.CurrentLine-1)*hexBox1.BytesPerLine + hexBox1.CurrentPositionInLine - 1);
+        }
+
+        private void goToToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Form Goto = new dlgGoto();
+            Goto.ShowDialog();
+            this.Text = dlgGoto.addr.ToString("X4");
+            
         }
 
 
