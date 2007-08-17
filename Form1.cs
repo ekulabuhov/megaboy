@@ -34,10 +34,11 @@ namespace MyProj
         smthng[] op = new smthng[0xFF];
         Random rnd = new Random(123);
         DynamicByteProvider dynamicbp;
+        string dynMemMap = "RAM1 D";
 
         const byte carryF = 1<<4, hcarryF = 1<<5, nF = 1<<6, zF = 1<<7;
         
-
+        
         void Emu_Init()
         {
             // Open File
@@ -67,6 +68,7 @@ namespace MyProj
             // Display memory
             dynamicbp = new DynamicByteProvider(RAM1);
             hexBox1.ByteProvider = dynamicbp;
+            
            // hexBox1.ScrollByteIntoView(0xA0);
             
                         
@@ -203,7 +205,6 @@ namespace MyProj
             gb_pc++;
         }
 
-        // No else if`s please... Use switch instead?
         void writemem(ushort addr, byte value)
         {
             int map = addr >> 12;
@@ -264,17 +265,32 @@ namespace MyProj
 
         private void PositionChanged(object sender, EventArgs e)
         {
-            toolStripStatusLabel1.Text = string.Format("Ln {0}  Col {1} Pos {2:X2}",
-                hexBox1.CurrentLine, hexBox1.CurrentPositionInLine,
-                (hexBox1.CurrentLine-1)*hexBox1.BytesPerLine + hexBox1.CurrentPositionInLine - 1);
+            toolStripStatusLabel1.Text = string.Format("Pos: {1}{0:X3}",
+                (hexBox1.CurrentLine-1)*hexBox1.BytesPerLine + hexBox1.CurrentPositionInLine - 1, dynMemMap);
         }
 
         private void goToToolStripMenuItem_Click(object sender, EventArgs e)
-        {
+        {           
             Form Goto = new dlgGoto();
-            Goto.ShowDialog();
+            if (Goto.ShowDialog() == DialogResult.No)
             this.Text = dlgGoto.addr.ToString("X4");
-            
+            int map = dlgGoto.addr >> 12;
+
+            switch (map)
+            {
+                case 0xD:
+                    dynamicbp = new DynamicByteProvider(RAM1);
+                    dynMemMap = "RAM1 D";
+                    break;
+                case 0xF:
+                    dynamicbp = new DynamicByteProvider(IO);
+                    dynMemMap = "IO FFxx ";
+                    dlgGoto.addr &= 0xFF;
+                    break;
+            }
+            hexBox1.ByteProvider = dynamicbp;
+            hexBox1.ScrollByteIntoView(dlgGoto.addr & 0xFFF);
+            hexBox1.Select(dlgGoto.addr & 0xFFF, 1);
         }
 
 

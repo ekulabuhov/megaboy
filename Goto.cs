@@ -18,13 +18,15 @@ namespace MyProj
 
         private void btnOK_Click(object sender, EventArgs e)
         {
+            this.DialogResult = DialogResult.OK;
             try
             {
                 addr = ushort.Parse(tbGoto.Text, System.Globalization.NumberStyles.HexNumber);
             }
-            catch (System.Exception ex)
+            catch (System.Exception)
             {
-                MessageBox.Show("Uh oh");
+                MessageBox.Show(dlgGoto.ActiveForm, "Uh oh", "Error");
+                DialogResult = DialogResult.Abort;
             }
             this.Close();
         }
