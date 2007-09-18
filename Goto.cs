@@ -6,7 +6,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 
-namespace MyProj
+namespace megaboy
 {
     public partial class dlgGoto : Form
     {
