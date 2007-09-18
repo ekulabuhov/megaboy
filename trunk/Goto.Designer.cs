@@ -1,4 +1,4 @@
-﻿namespace MyProj
+﻿namespace megaboy
 {
     partial class dlgGoto
     {
@@ -41,6 +41,7 @@
             // 
             // btnOK
             // 
+            this.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.btnOK.Location = new System.Drawing.Point(145, 3);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(75, 19);

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace MyProj.Properties {
+namespace megaboy.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

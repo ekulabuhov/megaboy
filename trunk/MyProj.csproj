@@ -7,14 +7,15 @@
     <ProjectGuid>{B048F9EE-695D-4BF2-81E8-149180B065AF}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MyProj</RootNamespace>
-    <AssemblyName>MyProj</AssemblyName>
+    <RootNamespace>megaboy</RootNamespace>
+    <AssemblyName>megaboy</AssemblyName>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
     <OldToolsVersion>2.0</OldToolsVersion>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -27,7 +28,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -66,11 +66,17 @@
     <Compile Include="Class1.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.cs">
+    <Compile Include="IOWindow.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="IOWindow.Designer.cs">
+      <DependentUpon>IOWindow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MainDebug.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainDebug.Designer.cs">
+      <DependentUpon>MainDebug.cs</DependentUpon>
     </Compile>
     <Compile Include="Goto.cs">
       <SubType>Form</SubType>
@@ -80,9 +86,13 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Form1.resx">
+    <EmbeddedResource Include="IOWindow.resx">
       <SubType>Designer</SubType>
-      <DependentUpon>Form1.cs</DependentUpon>
+      <DependentUpon>IOWindow.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainDebug.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>MainDebug.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Goto.resx">
       <SubType>Designer</SubType>
@@ -98,6 +108,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
