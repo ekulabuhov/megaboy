@@ -39,7 +39,7 @@ namespace megaboy
                 case 6:
                     return AsmForm("LD B, ", ROM[gb_pc+1]);
                 case 0x3e:
-                    return AsmForm("LD A, ", ROM[gb_pc+1]);
+                    return String.Format("LD A, {0:X2}", ROM[gb_pc+1]);
                 case 0x32:
                     return AsmForm("LDD (HL), A");
                 case 5:
