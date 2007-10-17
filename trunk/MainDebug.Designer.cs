@@ -49,6 +49,7 @@ namespace megaboy
             this.lbDisasm = new System.Windows.Forms.ListBox();
             this.contextMAsm = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.goToMenuItemAsm = new System.Windows.Forms.ToolStripMenuItem();
+            this.addBreakpointToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMHex.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.contextMAsm.SuspendLayout();
@@ -244,9 +245,10 @@ namespace megaboy
             // contextMAsm
             // 
             this.contextMAsm.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.goToMenuItemAsm});
+            this.goToMenuItemAsm,
+            this.addBreakpointToolStripMenuItem});
             this.contextMAsm.Name = "contextMAsm";
-            this.contextMAsm.Size = new System.Drawing.Size(127, 26);
+            this.contextMAsm.Size = new System.Drawing.Size(153, 70);
             // 
             // goToMenuItemAsm
             // 
@@ -254,6 +256,13 @@ namespace megaboy
             this.goToMenuItemAsm.Size = new System.Drawing.Size(126, 22);
             this.goToMenuItemAsm.Text = "Go to ...";
             this.goToMenuItemAsm.Click += new System.EventHandler(this.goToMenuItemAsm_Click);
+            // 
+            // addBreakpointToolStripMenuItem
+            // 
+            this.addBreakpointToolStripMenuItem.Name = "addBreakpointToolStripMenuItem";
+            this.addBreakpointToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.addBreakpointToolStripMenuItem.Text = "Add Break";
+            this.addBreakpointToolStripMenuItem.Click += new System.EventHandler(this.addBreakpointToolStripMenuItem_Click);
             // 
             // MainDebug
             // 
@@ -311,6 +320,7 @@ namespace megaboy
         private System.Windows.Forms.ListBox lbDisasm;
         private System.Windows.Forms.ContextMenuStrip contextMAsm;
         private System.Windows.Forms.ToolStripMenuItem goToMenuItemAsm;
+        private System.Windows.Forms.ToolStripMenuItem addBreakpointToolStripMenuItem;
     }
 }
 

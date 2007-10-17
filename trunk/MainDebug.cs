@@ -39,6 +39,7 @@ namespace megaboy
         /* Misc  */
         int cycles = 0, autorun = 0, lbPC;
         public static int retraceCounter;
+        ushort breakpoint;
 
         /* OP Pointers  */
         delegate void smthng();
@@ -85,7 +86,7 @@ namespace megaboy
             dynamicbp = new DynamicByteProvider(RAM1);
             hexBox1.ByteProvider = dynamicbp;
 
-            retraceCounter = LY_INTERVAL;
+            retraceCounter = 131;   // from no$gmb, originally: LY_INTERVAL
             IOMap = new IOWindow();
             IOMap.Location = new Point(80, 100);
             IOMap.Show();
@@ -270,6 +271,7 @@ namespace megaboy
             return System.Text.Encoding.ASCII.GetString(arr);
         }
 
+        // Execute one preloaded instruction
         private void button1_Click(object sender, EventArgs e)
         {
             do
@@ -277,21 +279,38 @@ namespace megaboy
                 op[instr]();
                 cycles += cycleTbl[instr];
                 instr = ROM[gb_pc];
-            } while (autorun == 1);
+            
+
             retraceCounter -= cycles;
             cycles = 0;
+
+            if (retraceCounter <= 0)
+            {
+                // INCREASE LY register & RESET retrace counter
+                IOWindow.IOPorts.LY++;
+                if (IOWindow.IOPorts.LY > 153)
+                    // if overflown, reset it
+                    IOWindow.IOPorts.LY = 0;
+
+                retraceCounter += LY_INTERVAL;
+            }
+            if (gb_pc == breakpoint)
+                autorun = 0;
+            } while (autorun == 1);
+
             GotoPC(gb_pc);
             UpdateInfo();
             UpdateIOForm();
         }
 
-
+        // Memory window cursor handler
         private void PositionChanged(object sender, EventArgs e)
         {
             toolStripStatusLabel1.Text = string.Format("{1}:{0:X4}",
                 (hexBox1.CurrentLine-1)*hexBox1.BytesPerLine + hexBox1.CurrentPositionInLine - 1 + dynMemOffset, dynMemMap);
         }
 
+        // Memory window Go To handler
         private void goToToolStripMenuItem_Click(object sender, EventArgs e)
         {           
             Form Goto = new dlgGoto();
@@ -326,6 +345,7 @@ namespace megaboy
             hexBox1.Select(dlgGoto.addr & 0xFFF, 1);
         }
 
+        // Disassm window Go To handler
         private void goToMenuItemAsm_Click(object sender, EventArgs e)
         {
             Form Goto = new dlgGoto();
@@ -333,9 +353,9 @@ namespace megaboy
             GotoPC(dlgGoto.addr);
         }
 
+        int index;      // Used by GotoPC, in here just to make it global
         void GotoPC(int PC)
         {
-            int index = lbDisasm.SelectedIndex;
             int m;
 
             // get the closest reference point & count from it
@@ -385,8 +405,24 @@ namespace megaboy
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)   // HotKeys!
         {
+            //bNext.Text = e.KeyValue.ToString();
+
             if (e.KeyValue == 118)  // F7 - Trace
                 bNext.PerformClick();
+            if (e.KeyValue == 120)  // F9 - Run
+            {
+                autorun = 1;
+                bNext.PerformClick();
+            }
+            
+        }
+
+        private void addBreakpointToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Form SetBreak = new dlgGoto();
+            SetBreak.Text = "Set Break on";
+            if (SetBreak.ShowDialog() == DialogResult.Cancel) return;
+            breakpoint = dlgGoto.addr;
         }
         
 

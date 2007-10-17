@@ -21,13 +21,12 @@ namespace megaboy
         {
             InitializeComponent();
             MainDebug.UpdateIOForm = new MainDebug.updateIODelegate(UpdateIO);
-            //UpdateIO(0);
         }
-
+        
+        // Use it only to update info on the form, not the actual data!
         public void UpdateIO()
         {
             lRetrC.Text = MainDebug.retraceCounter.ToString("D3");
-            
             lLY.Text = IOPorts.LY.ToString("X2");
         }
     }
