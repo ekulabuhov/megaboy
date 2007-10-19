@@ -30,7 +30,7 @@ namespace megaboy
         byte[] ROM = new byte[0x4000];
         byte[] some = new byte[20];
         byte[] RAM1 = new byte[0x1000];
-        byte[] IO = new byte[0x100];
+        public static byte[] IO = new byte[0x100];
 
         /* CPU  */
         ushort gb_bc, gb_de, gb_hl, gb_sp, gb_pc;
@@ -39,6 +39,9 @@ namespace megaboy
         /* Misc  */
         int cycles = 0, autorun = 0, lbPC;
         public static int retraceCounter;
+        int modeCounter;
+        string[] modes = {"H-Blank", "V-Blank", "OAM", "VRAM", };
+        byte[] modeInterval = { 51, 0, 20, 43, }; // how much in cycles each period longs
         ushort breakpoint;
 
         /* OP Pointers  */
@@ -86,9 +89,13 @@ namespace megaboy
             dynamicbp = new DynamicByteProvider(RAM1);
             hexBox1.ByteProvider = dynamicbp;
 
+            /* GameBoy starts in the VBlank mode 
+             * and stays there for 17 cycles only */
             retraceCounter = 131;   // from no$gmb, originally: LY_INTERVAL
+            modeCounter = 17;
+            IO[0x41] = 1;
             IOMap = new IOWindow();
-            IOMap.Location = new Point(80, 100);
+            IOMap.Location = new Point(80, 60);
             IOMap.Show();
             UpdateIOForm();
                                
@@ -111,6 +118,7 @@ namespace megaboy
             op[0x3E] = i3E;
             op[0xF3] = iF3;
             op[0xE0] = iE0;
+            op[0xF0] = iF0;
 
             FillIODesc();
             
@@ -224,6 +232,12 @@ namespace megaboy
             gb_pc++;
         }
 
+        void iF0()  // LD A,(FFnn)  12 ---- read from io-port n (memory FF00+n)
+        {
+            readmem((ushort)(0xFF00 + ROM[++gb_pc]));
+            gb_pc++;
+        }
+
 
         void writemem(ushort addr, byte value)
         {
@@ -236,13 +250,36 @@ namespace megaboy
                     dynamicbp.WriteByte(addr & 0xFFF, value);
                     if (autorun==0) hexBox1.Refresh();
                     break;
-                case 0xF:       // I/O
-                    IO[addr & 0xFF] = value;
+                case 0xF:
+                    switch (addr & 0xFF00)
+                    {
+                        case 0xFF00:    // I/O
+                            switch (addr & 0xFF)
+                            {
+                                case 0x41:  // LCD Stat, 3 last bits are read only
+                                    value &= 0xf8;
+                                    IO[0x41] = (byte)(value | (IO[0x41] & 3));
+                                    break;
+                                default:    // Other I/O
+                                    IO[addr & 0xFF] = value;
+                                    break;
+                            }
+                            break;
+                    }
                     break;
             }
         }
 
-            
+        void readmem(ushort addr)
+        {
+            switch (addr)
+            {
+                case 0xFF44:
+                    gb_a = IOWindow.IOPorts.LY;
+                    break;
+            }
+        }
+
 
         void UpdateInfo()
         {
@@ -282,6 +319,7 @@ namespace megaboy
             
 
             retraceCounter -= cycles;
+            modeCounter -= cycles;
             cycles = 0;
 
             if (retraceCounter <= 0)
@@ -294,6 +332,17 @@ namespace megaboy
 
                 retraceCounter += LY_INTERVAL;
             }
+
+            if (modeCounter <= 0)
+            {
+                IO[0x41] += 1;
+                IO[0x41] &= 3;
+                // if mode is V-blank, but LY not equal to zero, skip it
+                if (((IO[0x41] & 3) == 1) && (IOWindow.IOPorts.LY != 0))
+                    IO[0x41] += 1;
+                modeCounter += modeInterval[(IO[0x41] & 3)];
+            }
+
             if (gb_pc == breakpoint)
                 autorun = 0;
             } while (autorun == 1);
