@@ -53,7 +53,9 @@ namespace megaboy
                 case 0xFF:
                     return AsmForm("RST 0x38");
                 case 0xE0:
-                    return String.Format("LD (FF00+{0:X2}),a ;{1}", ROM[gb_pc + 1], IOPortDesc[ROM[gb_pc+1]]);
+                    return String.Format("LD (FF00+{0:X2}),a  ;{1}", ROM[gb_pc + 1], IOPortDesc[ROM[gb_pc+1]]);
+                case 0xF0:
+                    return String.Format("LD a,(FF00+{0:X2})  ;{1}", ROM[gb_pc + 1], IOPortDesc[ROM[gb_pc + 1]]);
             }
             return "undefined";
         }
@@ -98,6 +100,7 @@ namespace megaboy
             IOPortDesc[0xFF] = "int enable";
             IOPortDesc[0x42] = "lcd scroll y";
             IOPortDesc[0x43] = "lcd scroll x";
+            IOPortDesc[0x44] = "lcd line y";
             IOPortDesc[0x41] = "lcd stat";
             IOPortDesc[0x40] = "lcd ctrl";
             IOPortDesc[0x1] = "serial data";
@@ -120,7 +123,7 @@ namespace megaboy
 /*0xC0*/          1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 /*0xD0*/          1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 /*0xE0*/          2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-/*0xF0*/          1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+/*0xF0*/          2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 
         byte[] cycleTbl = new byte[] 
 /*0x00*/        { 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1,
@@ -138,7 +141,7 @@ namespace megaboy
 /*0xC0*/          1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 /*0xD0*/          1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 /*0xE0*/          3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-/*0xF0*/          1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+/*0xF0*/          3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 
         string[] IOPortDesc = new string[0x100];
         
