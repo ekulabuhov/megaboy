@@ -1,0 +1,11 @@
+#summary GB LCD.
+#labels Phase-Implementation
+
+= Period Lengths =
+|| *Status* || *Length* || *Comments* ||
+|| *V-Blank* ||??? cycles|| Only when LY = (144..153) ||
+|| *OAM* ||20 cycles|| 
+|| *VRAM* ||43 cycles||
+|| *H-Blank* ||51 cycle|| 114 cycles needed to render one line ||
+
+After H-Blank LY increases by 1, then loops to OAM again.
