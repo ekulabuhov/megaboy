@@ -8,7 +8,7 @@ Modes cycle from 1 to 3, until screen renderer goes off the screen (indicated by
 
 = Period Lengths =
 || *Mode* || *Divided* || *Real* ||
-|| 0 *V-Blank* ||1140||4560|| Only when LY = (144..153) ||
+|| 0 *V-Blank* ||1140||4560||
 || 1 *OAM* ||19.25-20.75||77-83||
 || 2 *VRAM* ||42.25-43.75||169-175||
 || 3 *H-Blank* ||50.25-51.75||201-207||
