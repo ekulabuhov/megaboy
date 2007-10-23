@@ -1,11 +1,16 @@
 #summary GB LCD.
 #labels Phase-Implementation
+= Details =
+When implementing timing, you`ll probably divide real cycles by 4. In this document, if not specified different, than the value is divided.
+
+== Screen renderer ==
+Modes cycle from 1 to 3, until screen renderer goes off the screen (indicated by LY register when it is equal to 144), then mode 0 is enabled. LY is still increased every 114 cycles. 
 
 = Period Lengths =
-|| *Status* || *Length* || *Comments* ||
-|| *V-Blank* ||??? cycles|| Only when LY = (144..153) ||
-|| *OAM* ||20 cycles|| 
-|| *VRAM* ||43 cycles||
-|| *H-Blank* ||51 cycle|| 114 cycles needed to render one line ||
+|| *Mode* || *Divided* || *Real* ||
+|| 0 *V-Blank* ||1140||4560|| Only when LY = (144..153) ||
+|| 1 *OAM* ||19.25-20.75||77-83||
+|| 2 *VRAM* ||42.25-43.75||169-175||
+|| 3 *H-Blank* ||50.25-51.75||201-207||
 
-After H-Blank LY increases by 1, then loops to OAM again.
+114 ( thats 456 in real ) cycles needed to render one line. After H-Blank LY increases by 1, then loops to OAM again.  
