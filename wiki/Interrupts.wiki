@@ -6,6 +6,12 @@ When implementing timing, you`ll probably divide real cycles by 4. In this docum
 == Screen renderer ==
 Modes cycle from 1 to 3, until screen renderer goes off the screen (indicated by LY register when it is equal to 144), then mode 0 is enabled. LY is still increased every 114 cycles. 
 
+== LCD is OFF ==
+When LCD is switched OFF, probably when something writes 0 to 7th bit of LCD control register, some actions that would happen normally, don`t happen anymore. Includes:
+* LY updates (LY = 0 at that moment)
+* Modes don`t change (stays at H-Blank?)
+
+
 = Period Lengths =
 || *Mode* || *Divided* || *Real* ||
 || 0 *V-Blank* ||1140||4560||
