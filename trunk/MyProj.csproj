@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.20706</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{B048F9EE-695D-4BF2-81E8-149180B065AF}</ProjectGuid>
     <OutputType>WinExe</OutputType>
@@ -53,7 +53,7 @@
   <ItemGroup>
     <Reference Include="Be.Windows.Forms.HexBox, Version=1.1.1.19402, Culture=neutral, PublicKeyToken=e0e5adf0ebc99863">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Desktop\Be.HexEditor.111\Be.HexEditor.111\bin\Be.Windows.Forms.HexBox.dll</HintPath>
+      <HintPath>..\..\Be.HexEditor.130\bin\Be.Windows.Forms.HexBox.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -66,6 +66,7 @@
     <Compile Include="Class1.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="CPU.cs" />
     <Compile Include="IOWindow.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -84,6 +85,7 @@
     <Compile Include="Goto.Designer.cs">
       <DependentUpon>Goto.cs</DependentUpon>
     </Compile>
+    <Compile Include="Memory.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="IOWindow.resx">
@@ -103,6 +105,10 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="VramViewer.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>VramViewer.cs</DependentUpon>
+    </EmbeddedResource>
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
@@ -117,6 +123,12 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="VramViewer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="VramViewer.Designer.cs">
+      <DependentUpon>VramViewer.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -145,6 +157,9 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
