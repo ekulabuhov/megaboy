@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 namespace megaboy
-{
+{   
     public partial class MainDebug
     {
         public struct PosData
@@ -15,7 +15,9 @@ namespace megaboy
         /*------------For calling from main--------*/
         // Define delegate
         public delegate void updateIODelegate();
+        public delegate void updatePaletteDelegate(byte PAL);
         // Create instance (null)
+        public static updatePaletteDelegate UpdatePalette;
         public static updateIODelegate UpdateIOForm;
         /*-----------------------------------------*/
 
@@ -24,38 +26,47 @@ namespace megaboy
          * Why the fuck am I using AsmForm?  */
         string AsmDisc(byte instr)
         {
+            
             switch (instr)
             {
                 case 0:
                     return "NOP";
                 case 0xC3:
-                    return AsmForm("JP ", (ushort)(ROM[gb_pc+1] + (ROM[gb_pc+2]<<8)));
+                    return String.Format("JP {0:X4}", Mem.readRomU16(CPU.gb_pc+1));
                 case 0xAF:
-                    return AsmForm("XOR A");
+                    return "XOR A";
                 case 0x21:
-                    return AsmForm("LD HL, ", (ushort)(ROM[gb_pc+1] + (ROM[gb_pc+2]<<8)));
+                    return String.Format("LD HL, ", Mem.readRomU16(CPU.gb_pc+1));
+                case 0x31:
+                    return String.Format("LD SP, ", Mem.readRomU16(CPU.gb_pc + 1));
                 case 0xe:
-                    return AsmForm("LD C, ", ROM[gb_pc+1]);
+                    return String.Format("LD C, {0:X2}", Mem.readRomU8(CPU.gb_pc+1));
                 case 6:
-                    return AsmForm("LD B, ", ROM[gb_pc+1]);
+                    return String.Format("LD B, {0:X2}", Mem.readRomU8(CPU.gb_pc+1));
                 case 0x3e:
-                    return String.Format("LD A, {0:X2}", ROM[gb_pc+1]);
+                    return String.Format("LD A, {0:X2}", Mem.readRomU8(CPU.gb_pc+1));
                 case 0x32:
-                    return AsmForm("LDD (HL), A");
+                    return "LDD (HL), A";
+                case 0x36:
+                    return String.Format("LD (HL),{0:X2}", Mem.readRomU8(CPU.gb_pc + 1));
                 case 5:
-                    return AsmForm("DEC B");
+                    return "DEC B";
                 case 0xd:
-                    return AsmForm("DEC C");
+                    return "DEC C";
                 case 0x20:
-                    return AsmForm("JR NZ, ", (ushort)(gb_pc + ROM[gb_pc+1] - 0xfe));
+                    return AsmForm("JR NZ, ", (ushort)(CPU.gb_pc + Mem.readRomU8(CPU.gb_pc+1) - 0xfe));
                 case 0xF3:
-                    return AsmForm("DI");
+                    return "DI";
                 case 0xFF:
-                    return AsmForm("RST 0x38");
+                    return "RST 0x38";
                 case 0xE0:
-                    return String.Format("LD (FF00+{0:X2}),a  ;{1}", ROM[gb_pc + 1], IOPortDesc[ROM[gb_pc+1]]);
+                    return String.Format("LD (FF00+{0:X2}),a  ;{1}", Mem.readRomU8(CPU.gb_pc + 1), IOPortDesc[Mem.readRomU8(CPU.gb_pc+1)]);
+                case 0xEA:
+                    return String.Format("LD ({0:X4}),a", Mem.readRomU16(CPU.gb_pc+1));
                 case 0xF0:
-                    return String.Format("LD a,(FF00+{0:X2})  ;{1}", ROM[gb_pc + 1], IOPortDesc[ROM[gb_pc + 1]]);
+                    return String.Format("LD a,(FF00+{0:X2})  ;{1}", Mem.readRomU8(CPU.gb_pc + 1), Mem.readRomU8(CPU.gb_pc + 1));
+                case 0xFE:
+                    return String.Format("CP {0:X2}",Mem.readRomU8(CPU.gb_pc + 1));
             }
             return "undefined";
         }
@@ -70,27 +81,27 @@ namespace megaboy
 
         void Disassemble()
         {
-            gb_pc = 0;
+            CPU.gb_pc = 0;
             int m = 0;
             byte[] curInstr = new byte[3];
             
             for (int i = 0; i <= 1024; i++)
             {
-                curInstr = new byte[InstrLength[ROM[gb_pc]]];
-                Array.ConstrainedCopy(ROM, gb_pc, curInstr, 0, InstrLength[ROM[gb_pc]]);
-                lbDisasm.Items.Add(string.Format("ROM0:{0:X4} {1,-10} {2,-15} ;{3}", gb_pc, BitConverter.ToString(curInstr, 0), AsmDisc(ROM[gb_pc]), cycleTbl[curInstr[0]]));
-                gb_pc += InstrLength[ROM[gb_pc]];
+                curInstr = new byte[InstrLength[Mem.readRomU8(CPU.gb_pc)]];
+                Array.ConstrainedCopy(Mem.ROM, CPU.gb_pc, curInstr, 0, InstrLength[Mem.readRomU8(CPU.gb_pc)]);
+                lbDisasm.Items.Add(string.Format("ROM0:{0:X4} {1,-10} {2,-15} ;{3}", CPU.gb_pc, BitConverter.ToString(curInstr, 0), AsmDisc(Mem.readRomU8(CPU.gb_pc)), cycleTbl[curInstr[0]]));
+                CPU.gb_pc += InstrLength[Mem.readRomU8(CPU.gb_pc)];
 
                 // Position table for faster access
-                if (gb_pc >= (m) * 50)
+                if (CPU.gb_pc >= (m) * 50)
                 {
-                    listboxPos[m].PC = gb_pc;
+                    listboxPos[m].PC = CPU.gb_pc;
                     listboxPos[m].index = lbDisasm.Items.Count;
                     m++;
                 }
             }
             lbDisasm.SelectedIndex = 0;
-            gb_pc = 0x100;  // restore counter
+            CPU.gb_pc = 0x100;  // restore counter
             GotoPC(0x100);
         }
 
@@ -105,13 +116,16 @@ namespace megaboy
             IOPortDesc[0x40] = "lcd ctrl";
             IOPortDesc[0x1] = "serial data";
             IOPortDesc[0x2] = "serial ctrl";
+            IOPortDesc[0x47] = "lcd BG pal";
+            IOPortDesc[0x48] = "lcd OBJ0 pal";
+            IOPortDesc[0x49] = "lcd OBJ1 pal";
         }
 
         byte[] InstrLength = new byte[] 
 /*0x00*/        { 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1,
 /*0x10*/          1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 /*0x20*/          2, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-/*0x30*/          1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1,
+/*0x30*/          1, 3, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1,
 /*0x40*/          1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 /*0x50*/          1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 /*0x60*/          1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -122,14 +136,14 @@ namespace megaboy
 /*0xB0*/          1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 /*0xC0*/          1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 /*0xD0*/          1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-/*0xE0*/          2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-/*0xF0*/          2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+/*0xE0*/          2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1,
+/*0xF0*/          2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1 };
 
         byte[] cycleTbl = new byte[] 
 /*0x00*/        { 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1,
 /*0x10*/          1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 /*0x20*/          2, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-/*0x30*/          1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1,
+/*0x30*/          1, 3, 2, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 2, 1,
 /*0x40*/          1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 /*0x50*/          1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 /*0x60*/          1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -140,8 +154,8 @@ namespace megaboy
 /*0xB0*/          1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 /*0xC0*/          1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 /*0xD0*/          1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-/*0xE0*/          3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-/*0xF0*/          3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+/*0xE0*/          3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1,
+/*0xF0*/          3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1 };
 
         string[] IOPortDesc = new string[0x100];
         

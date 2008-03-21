@@ -50,9 +50,15 @@ namespace megaboy
             this.contextMAsm = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.goToMenuItemAsm = new System.Windows.Forms.ToolStripMenuItem();
             this.addBreakpointToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
+            this.iOMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.paletteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMHex.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.contextMAsm.SuspendLayout();
+            this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // bNext
@@ -68,60 +74,60 @@ namespace megaboy
             // lAF
             // 
             this.lAF.AutoSize = true;
-            this.lAF.Font = new System.Drawing.Font("Monospac821 BT", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lAF.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lAF.Location = new System.Drawing.Point(399, 38);
             this.lAF.Name = "lAF";
-            this.lAF.Size = new System.Drawing.Size(42, 14);
+            this.lAF.Size = new System.Drawing.Size(28, 13);
             this.lAF.TabIndex = 1;
             this.lAF.Text = "af = ";
             // 
             // lBC
             // 
             this.lBC.AutoSize = true;
-            this.lBC.Font = new System.Drawing.Font("Monospac821 BT", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lBC.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lBC.Location = new System.Drawing.Point(399, 51);
             this.lBC.Name = "lBC";
-            this.lBC.Size = new System.Drawing.Size(42, 14);
+            this.lBC.Size = new System.Drawing.Size(31, 13);
             this.lBC.TabIndex = 2;
             this.lBC.Text = "bc = ";
             // 
             // lDE
             // 
             this.lDE.AutoSize = true;
-            this.lDE.Font = new System.Drawing.Font("Monospac821 BT", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lDE.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lDE.Location = new System.Drawing.Point(399, 64);
             this.lDE.Name = "lDE";
-            this.lDE.Size = new System.Drawing.Size(42, 14);
+            this.lDE.Size = new System.Drawing.Size(31, 13);
             this.lDE.TabIndex = 3;
             this.lDE.Text = "de = ";
             // 
             // lHL
             // 
             this.lHL.AutoSize = true;
-            this.lHL.Font = new System.Drawing.Font("Monospac821 BT", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lHL.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lHL.Location = new System.Drawing.Point(399, 77);
             this.lHL.Name = "lHL";
-            this.lHL.Size = new System.Drawing.Size(42, 14);
+            this.lHL.Size = new System.Drawing.Size(27, 13);
             this.lHL.TabIndex = 4;
             this.lHL.Text = "hl = ";
             // 
             // lSP
             // 
             this.lSP.AutoSize = true;
-            this.lSP.Font = new System.Drawing.Font("Monospac821 BT", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lSP.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lSP.Location = new System.Drawing.Point(399, 90);
             this.lSP.Name = "lSP";
-            this.lSP.Size = new System.Drawing.Size(42, 14);
+            this.lSP.Size = new System.Drawing.Size(30, 13);
             this.lSP.TabIndex = 4;
             this.lSP.Text = "sp = ";
             // 
             // lPC
             // 
             this.lPC.AutoSize = true;
-            this.lPC.Font = new System.Drawing.Font("Monospac821 BT", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lPC.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lPC.Location = new System.Drawing.Point(399, 103);
             this.lPC.Name = "lPC";
-            this.lPC.Size = new System.Drawing.Size(42, 14);
+            this.lPC.Size = new System.Drawing.Size(31, 13);
             this.lPC.TabIndex = 4;
             this.lPC.Text = "pc = ";
             // 
@@ -184,11 +190,10 @@ namespace megaboy
             this.hexBox1.BytesPerLine = 8;
             this.hexBox1.ContextMenuStrip = this.contextMHex;
             this.hexBox1.Font = new System.Drawing.Font("Courier New", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.hexBox1.LineInfoForeColor = System.Drawing.Color.Empty;
             this.hexBox1.LineInfoVisible = true;
             this.hexBox1.Location = new System.Drawing.Point(12, 220);
             this.hexBox1.Name = "hexBox1";
-            this.hexBox1.SelectionLength = ((long)(0));
-            this.hexBox1.SelectionStart = ((long)(-1));
             this.hexBox1.ShadowSelectionColor = System.Drawing.Color.FromArgb(((int)(((byte)(100)))), ((int)(((byte)(60)))), ((int)(((byte)(188)))), ((int)(((byte)(255)))));
             this.hexBox1.Size = new System.Drawing.Size(482, 102);
             this.hexBox1.StringViewVisible = true;
@@ -248,21 +253,64 @@ namespace megaboy
             this.goToMenuItemAsm,
             this.addBreakpointToolStripMenuItem});
             this.contextMAsm.Name = "contextMAsm";
-            this.contextMAsm.Size = new System.Drawing.Size(153, 70);
+            this.contextMAsm.Size = new System.Drawing.Size(135, 48);
             // 
             // goToMenuItemAsm
             // 
             this.goToMenuItemAsm.Name = "goToMenuItemAsm";
-            this.goToMenuItemAsm.Size = new System.Drawing.Size(126, 22);
+            this.goToMenuItemAsm.Size = new System.Drawing.Size(134, 22);
             this.goToMenuItemAsm.Text = "Go to ...";
             this.goToMenuItemAsm.Click += new System.EventHandler(this.goToMenuItemAsm_Click);
             // 
             // addBreakpointToolStripMenuItem
             // 
             this.addBreakpointToolStripMenuItem.Name = "addBreakpointToolStripMenuItem";
-            this.addBreakpointToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.addBreakpointToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
             this.addBreakpointToolStripMenuItem.Text = "Add Break";
             this.addBreakpointToolStripMenuItem.Click += new System.EventHandler(this.addBreakpointToolStripMenuItem_Click);
+            // 
+            // menuStrip1
+            // 
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItem1,
+            this.toolStripMenuItem2});
+            this.menuStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
+            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
+            this.menuStrip1.Size = new System.Drawing.Size(506, 24);
+            this.menuStrip1.TabIndex = 11;
+            this.menuStrip1.Text = "menuStrip1";
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(35, 20);
+            this.toolStripMenuItem1.Text = "File";
+            // 
+            // toolStripMenuItem2
+            // 
+            this.toolStripMenuItem2.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.iOMapToolStripMenuItem,
+            this.paletteToolStripMenuItem});
+            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(57, 20);
+            this.toolStripMenuItem2.Text = "Window";
+            // 
+            // iOMapToolStripMenuItem
+            // 
+            this.iOMapToolStripMenuItem.Name = "iOMapToolStripMenuItem";
+            this.iOMapToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F10;
+            this.iOMapToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.iOMapToolStripMenuItem.Text = "I/O Map";
+            this.iOMapToolStripMenuItem.Click += new System.EventHandler(this.iOMapToolStripMenuItem_Click);
+            // 
+            // paletteToolStripMenuItem
+            // 
+            this.paletteToolStripMenuItem.Name = "paletteToolStripMenuItem";
+            this.paletteToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.paletteToolStripMenuItem.Text = "Palette";
+            this.paletteToolStripMenuItem.Click += new System.EventHandler(this.paletteToolStripMenuItem_Click);
             // 
             // MainDebug
             // 
@@ -271,6 +319,7 @@ namespace megaboy
             this.ClientSize = new System.Drawing.Size(506, 353);
             this.Controls.Add(this.lbDisasm);
             this.Controls.Add(this.statusStrip1);
+            this.Controls.Add(this.menuStrip1);
             this.Controls.Add(this.hexBox1);
             this.Controls.Add(this.cbC);
             this.Controls.Add(this.cbH);
@@ -285,6 +334,7 @@ namespace megaboy
             this.Controls.Add(this.lAF);
             this.Controls.Add(this.bNext);
             this.KeyPreview = true;
+            this.MainMenuStrip = this.menuStrip1;
             this.Name = "MainDebug";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Main";
@@ -293,6 +343,8 @@ namespace megaboy
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.contextMAsm.ResumeLayout(false);
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -321,6 +373,11 @@ namespace megaboy
         private System.Windows.Forms.ContextMenuStrip contextMAsm;
         private System.Windows.Forms.ToolStripMenuItem goToMenuItemAsm;
         private System.Windows.Forms.ToolStripMenuItem addBreakpointToolStripMenuItem;
+        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
+        private System.Windows.Forms.ToolStripMenuItem iOMapToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem paletteToolStripMenuItem;
     }
 }
 

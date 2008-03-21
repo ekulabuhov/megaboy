@@ -25,274 +25,115 @@ namespace megaboy
     public partial class MainDebug : Form
     {
         public static Form IOMap;
+        public static Form VramMap;
 
-        /* Memory Map  */
-        byte[] ROM = new byte[0x4000];
         byte[] some = new byte[20];
-        byte[] RAM1 = new byte[0x1000];
-        public static byte[] IO = new byte[0x100];
 
         /* CPU  */
-        ushort gb_bc, gb_de, gb_hl, gb_sp, gb_pc;
-        byte instr, gb_a, gb_flgs, gb_ime;
+        Z80 CPU = new Z80();
+
+        /* Memory */
+        public static Memory Mem = new Memory();
 
         /* Misc  */
-        int cycles = 0, autorun = 0, lbPC;
+        public static int cycles = 0, autorun = 0, lbPC;
         public static int retraceCounter;
         int modeCounter;
         string[] modes = {"H-Blank", "V-Blank", "OAM", "VRAM", };
-        byte[] modeInterval = { 51, 0, 20, 43, }; // how much in cycles each period longs
+        int[] modeInterval = { 51, 1140, 20, 43, }; // how much in cycles each period longs
         ushort breakpoint;
 
-        /* OP Pointers  */
-        delegate void smthng();
-        smthng[] op = new smthng[0xFF];
+        
 
         /* HexViewer  */
-        Random rnd = new Random(123);
-        DynamicByteProvider dynamicbp;
+        public static DynamicByteProvider dynamicbp;
         string dynMemMap = "RAM1";
-        ushort dynMemOffset = 0xD000;
+        public static ushort dynMemOffset = 0xD000;
 
         /* Constants  */
         const int LY_INTERVAL = 114;
-        const byte carryF = 1<<4, hcarryF = 1<<5, nF = 1<<6, zF = 1<<7;
+        
+        const byte BGPAL = 1, OBJ0PAL = 2, OBJ1PAL = 3;
+
+        /* Palettes  */
+        public static Color[] defaultPal = { Color.White, Color.LightGray, Color.Gray, Color.Black }; 
         
         
         void Emu_Init()
         {
             // Open File
-            FileStream fs = new FileStream("C:/Rom.gb", FileMode.Open);
+            FileStream fs = new FileStream("D:/Tetris.gb", FileMode.Open);
             // Create reader
             BinaryReader r = new BinaryReader(fs);
             // Read rom to memory
-            ROM = r.ReadBytes(0x4000);
+            byte[] fileBuf = new byte[fs.Length];
+            fileBuf = r.ReadBytes((int)fs.Length);
+            // Read first ROM page
+            Mem.copyRom(fileBuf);   
             r.Close();
             fs.Close();
             // Close it
             // Copy some bytes from array to form an RomTitle
-            Array.ConstrainedCopy(ROM, 0x134, some, 0, 16);
+            Array.ConstrainedCopy(fileBuf, 0x134, some, 0, 16);
             lTitle.Text += Hex2String(some);
-            // Init regs
-            gb_a = 0x01;
-            gb_flgs = 0xB0;
-            gb_bc = 0x0013;
-            gb_de = 0x00D8;
-            gb_hl = 0x014D;
-            gb_sp = 0xFFFE;
-            gb_pc = 0x0100;
 
-            // Fill RAM with random values
-            rnd.NextBytes(RAM1);
+
 
             // Display memory
-            dynamicbp = new DynamicByteProvider(RAM1);
+            dynamicbp = new DynamicByteProvider(Mem.RAM1);
             hexBox1.ByteProvider = dynamicbp;
 
             /* GameBoy starts in the VBlank mode 
              * and stays there for 17 cycles only */
             retraceCounter = 131;   // from no$gmb, originally: LY_INTERVAL
             modeCounter = 17;
-            IO[0x41] = 1;
+            Mem.IO[0x41] = 1;
+            // Create I/O window
             IOMap = new IOWindow();
             IOMap.Location = new Point(80, 60);
             IOMap.Show();
+
+            VramMap = new VramViewer();
+            
+            Mem.IO[0x47] = 0xFC;    // Background Palette
+            Mem.IO[0x48] = 0xFF;    // Sprite 0 Palette
+            Mem.IO[0x49] = 0xFF;    // Sprite 1 Palette
+
+            UpdatePalette(BGPAL);
+            UpdatePalette(OBJ0PAL);
+            UpdatePalette(OBJ1PAL);
+
+            /* Set volume to MAX, Vin to OFF
+             * Set which channels to output to L/R
+             * Sound is ON  */
+            Mem.IO[0x24] = 0x77;    // Sound ON-OFF / Volume
+            Mem.IO[0x25] = 0xF3;    // Selection of Sound output terminal
+            Mem.IO[0x26] = 0xF1;    // Sound on/off
+
+            /* LCD is ON, BG is ON */
+            Mem.IO[0x40] = 0x91;    // LCDC
+
             UpdateIOForm();
-                               
             
-            
-
-            instr = ROM[gb_pc];
-            
-   
-            op[0] = iNOP;
-            op[0xC3] = iC3;
-            op[0xAF] = iAF;
-            op[0x21] = i21;
-            op[0x0E] = i0E;
-            op[0x06] = i06;
-            op[0x32] = i32;
-            op[0x05] = i05;
-            op[0x0D] = i0D;
-            op[0x20] = i20;
-            op[0x3E] = i3E;
-            op[0xF3] = iF3;
-            op[0xE0] = iE0;
-            op[0xF0] = iF0;
-
             FillIODesc();
             
             UpdateInfo();
               
         }
 
-        void iNOP()
-        {
-            gb_pc++;
-        }
-
-        void iC3()  // C3 nn nn    16 ---- jump to nn, PC=nn
-        {
-            ushort addr;
-            addr = ROM[gb_pc+2];
-            addr <<= 8;
-            addr |= ROM[gb_pc+1];
-            gb_pc = addr;            
-        }
-
-        void iAF()  // xor  A           Ax         4 z000
-        {
-            gb_a = 0;
-            gb_flgs = zF;
-            gb_pc++;
-        }
-
-        void i21()  // ld HL,#nnnn    12 ----  
-        {
-            gb_hl = Convert.ToUInt16(ROM[++gb_pc] + (ROM[++gb_pc]<<8));
-            gb_pc++;
-        }
-
-        void i0E()  // LD C,#nn     8 ---- r=n
-        {
-            gb_bc &= 0xff00;
-            gb_bc |= ROM[++gb_pc];
-            gb_pc++;
-        }
-
-        void i06()  // LD B,#nn     8 ---- r=n
-        {
-            gb_bc &= 0x00ff;
-            gb_bc |= (ushort)(ROM[++gb_pc] << 8);
-            gb_pc++;
-        }
-
-        void i3E()  // LD A,#nn     8 ---- r=n
-        {
-            gb_a = ROM[++gb_pc];
-            gb_pc++;
-        }
-
-        void i32()  // LDD (HL),A	8 ---- (HL)=A, HL=HL-1
-        {
-            writemem(gb_hl--, gb_a);
-            gb_pc++;
-        }
-
-        void i05()  // dec  B       4 z1h- 
-        {
-            gb_flgs &= carryF;      // Save carry (from goomba)
-            gb_flgs |= nF;
-            if ((gb_bc & 0x0F00) == 0)
-                gb_flgs |= hcarryF;
-            gb_bc -= 0x0100;
-            if ((gb_bc & 0xFF00) == 0)
-                gb_flgs |= zF;
-            gb_pc++;
-        }
-
-        void i0D()  // dec  C      4 z1h-
-        {
-            ushort c;
-            c = (ushort)(gb_bc << 8);
-            gb_flgs &= carryF;      // Save carry (from goomba)
-            gb_flgs |= nF;
-            if ((c & 0x0F00) == 0)
-                gb_flgs |= hcarryF;
-            c -= 0x0100;
-            if ((c & 0xFF00) == 0)
-                gb_flgs |= zF;
-            gb_bc &= 0xFF00;
-            gb_bc |= (ushort)(c >> 8);
-            gb_pc++;
-        }
-            
-        void i20()  // JR NZ,*      12;8 ---- relative jump if not zero
-        {
-            byte addr;
-            if ((gb_flgs & zF) == 0)
-            {
-                addr = (byte)(ROM[gb_pc+1] + gb_pc);
-                gb_pc &= 0xFF00;    // Leave only high part
-                gb_pc |= addr;
-                cycles += 1;
-            }
-            gb_pc+=2;
-        }
-
-        void iF3()  // DI           4 ---- disable interrupts, IME=0
-        {
-            gb_ime = 0;
-            gb_pc++;
-        }
-
-        void iE0()  // LD (FFnn),A  12 ---- write to io-port n (memory FF00+n)
-        {
-            writemem((ushort)(0xFF00 + ROM[++gb_pc]), gb_a);
-            gb_pc++;
-        }
-
-        void iF0()  // LD A,(FFnn)  12 ---- read from io-port n (memory FF00+n)
-        {
-            readmem((ushort)(0xFF00 + ROM[++gb_pc]));
-            gb_pc++;
-        }
-
-
-        void writemem(ushort addr, byte value)
-        {
-            int map = addr >> 12;
-            
-            switch(map)
-            {
-                case 0xD:       // RAM1
-                    RAM1[addr & 0xFFF] = value;
-                    dynamicbp.WriteByte(addr & 0xFFF, value);
-                    if (autorun==0) hexBox1.Refresh();
-                    break;
-                case 0xF:
-                    switch (addr & 0xFF00)
-                    {
-                        case 0xFF00:    // I/O
-                            switch (addr & 0xFF)
-                            {
-                                case 0x41:  // LCD Stat, 3 last bits are read only
-                                    value &= 0xf8;
-                                    IO[0x41] = (byte)(value | (IO[0x41] & 3));
-                                    break;
-                                default:    // Other I/O
-                                    IO[addr & 0xFF] = value;
-                                    break;
-                            }
-                            break;
-                    }
-                    break;
-            }
-        }
-
-        void readmem(ushort addr)
-        {
-            switch (addr)
-            {
-                case 0xFF44:
-                    gb_a = IOWindow.IOPorts.LY;
-                    break;
-            }
-        }
-
 
         void UpdateInfo()
         {
-            lAF.Text = "AF = " + gb_a.ToString("X2") + gb_flgs.ToString("X2");
-            lBC.Text = "BC = " + gb_bc.ToString("X4");
-            lDE.Text = "DE = " + gb_de.ToString("X4");
-            lHL.Text = "HL = " + gb_hl.ToString("X4");
-            lSP.Text = "SP = " + gb_sp.ToString("X4");
-            lPC.Text = "PC = " + gb_pc.ToString("X4");
-            cbZ.Checked = ((gb_flgs & zF) > 0);
-            cbN.Checked = ((gb_flgs & nF) > 0);
-            cbH.Checked = ((gb_flgs & hcarryF) > 0);
-            cbC.Checked = ((gb_flgs & carryF) > 0);
+            lAF.Text = "AF = " + CPU.readRegAF();
+            lBC.Text = "BC = " + CPU.gb_bc.ToString("X4");
+            lDE.Text = "DE = " + CPU.gb_de.ToString("X4");
+            lHL.Text = "HL = " + CPU.gb_hl.ToString("X4");
+            lSP.Text = "SP = " + CPU.gb_sp.ToString("X4");
+            lPC.Text = "PC = " + CPU.gb_pc.ToString("X4");
+            cbZ.Checked = ((CPU.gb_flgs & CPU.zF) > 0);
+            cbN.Checked = ((CPU.gb_flgs & CPU.nF) > 0);
+            cbH.Checked = ((CPU.gb_flgs & CPU.hcarryF) > 0);
+            cbC.Checked = ((CPU.gb_flgs & CPU.carryF) > 0);
         }
 
         public MainDebug()
@@ -313,14 +154,21 @@ namespace megaboy
         {
             do
             {
-                op[instr]();
-                cycles += cycleTbl[instr];
-                instr = ROM[gb_pc];
-            
+                CPU.step();
+                if (Mem.Changed)
+                {
+                    MessageBox.Show("memwrite\n Replace me with event!");
+                }
 
-            retraceCounter -= cycles;
-            modeCounter -= cycles;
-            cycles = 0;
+                cycles += cycleTbl[CPU.instr];
+                
+                // Update cycle counters if display enabled
+                if ((Mem.IO[0x40] & IOWindow.LCDON) > 0)
+                {
+                    retraceCounter -= cycles;
+                    modeCounter -= cycles;
+                }
+                cycles = 0;
 
             if (retraceCounter <= 0)
             {
@@ -335,19 +183,19 @@ namespace megaboy
 
             if (modeCounter <= 0)
             {
-                IO[0x41] += 1;
-                IO[0x41] &= 3;
-                // if mode is V-blank, but LY not equal to zero, skip it
-                if (((IO[0x41] & 3) == 1) && (IOWindow.IOPorts.LY != 0))
-                    IO[0x41] += 1;
-                modeCounter += modeInterval[(IO[0x41] & 3)];
+                Mem.IO[0x41] += 1;  // LCD Stat
+                Mem.IO[0x41] &= 3;
+                // if mode is V-blank, but LY not in range (144..153), skip it
+                if (((Mem.IO[0x41] & 3) == 1) && (IOWindow.IOPorts.LY < 144))
+                    Mem.IO[0x41] += 1;
+                modeCounter += modeInterval[(Mem.IO[0x41] & 3)];
             }
 
-            if (gb_pc == breakpoint)
+            if (CPU.gb_pc == breakpoint)
                 autorun = 0;
             } while (autorun == 1);
 
-            GotoPC(gb_pc);
+            GotoPC(CPU.gb_pc);
             UpdateInfo();
             UpdateIOForm();
         }
@@ -373,17 +221,22 @@ namespace megaboy
                 case 0x1:
                 case 0x2:
                 case 0x3:
-                    dynamicbp = new DynamicByteProvider(ROM);
+                    dynamicbp = new DynamicByteProvider(Mem.ROM);
                     dynMemMap = "ROM0";
                     dynMemOffset = 0;
                     break;
+                case 0xC:
+                    dynamicbp = new DynamicByteProvider(Mem.RAM0);
+                    dynMemMap = "RAM0";
+                    dynMemOffset = 0xC000;
+                    break;
                 case 0xD:
-                    dynamicbp = new DynamicByteProvider(RAM1);
+                    dynamicbp = new DynamicByteProvider(Mem.RAM1);
                     dynMemMap = "RAM1";
                     dynMemOffset = 0xD000;
                     break;
                 case 0xF:
-                    dynamicbp = new DynamicByteProvider(IO);
+                    dynamicbp = new DynamicByteProvider(Mem.IO);
                     dynMemMap = "IO";
                     dynMemOffset = 0xFF00;
                     dlgGoto.addr &= 0xFF;
@@ -423,7 +276,7 @@ namespace megaboy
             // We can only trace forward
             while (lbPC != PC)
             {
-                lbPC += InstrLength[ROM[lbPC]];
+                lbPC += InstrLength[Mem.readRomU8(lbPC)];
                 index++;
             }
             lbDisasm.TopIndex = index - 3;
@@ -433,23 +286,23 @@ namespace megaboy
 
         private void cbZ_Click(object sender, EventArgs e)
         {
-            gb_flgs ^= zF;
-            lAF.Text = "AF = " + gb_a.ToString("X2") + gb_flgs.ToString("X2");
+            CPU.toggleZFlag();  
+            lAF.Text = "AF = " + CPU.readRegAF();
         }
         private void cbN_Click(object sender, EventArgs e)
         {
-            gb_flgs ^= nF;
-            lAF.Text = "AF = " + gb_a.ToString("X2") + gb_flgs.ToString("X2");
+            CPU.toggleNFlag();
+            lAF.Text = "AF = " + CPU.readRegAF();
         }
         private void cbH_Click(object sender, EventArgs e)
         {
-            gb_flgs ^= hcarryF;
-            lAF.Text = "AF = " + gb_a.ToString("X2") + gb_flgs.ToString("X2");
+            CPU.toggleHCarryFlag();
+            lAF.Text = "AF = " + CPU.readRegAF();
         }
         private void cbC_Click(object sender, EventArgs e)
         {
-            gb_flgs ^= carryF;
-            lAF.Text = "AF = " + gb_a.ToString("X2") + gb_flgs.ToString("X2");
+            CPU.toggleCarryFlag();
+            lAF.Text = "AF = " + CPU.readRegAF();
         }
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)   // HotKeys!
@@ -472,6 +325,16 @@ namespace megaboy
             SetBreak.Text = "Set Break on";
             if (SetBreak.ShowDialog() == DialogResult.Cancel) return;
             breakpoint = dlgGoto.addr;
+        }
+
+        private void iOMapToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            IOMap.Show();
+        }
+
+        private void paletteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            VramMap.Show();
         }
         
 
