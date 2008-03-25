@@ -10,7 +10,6 @@ namespace megaboy
 {
     public partial class VramViewer : Form
     {
-        Memory Mem = MainDebug.Mem;
         public VramViewer()
         {
             InitializeComponent();
@@ -25,21 +24,21 @@ namespace megaboy
             switch (PAL)
             {
                 case 1:
-                    BGP = Mem.IO[0x47];
+                    BGP = Memory.readIOByte(IO.BGP);
                     cBGP0.BackColor = MainDebug.defaultPal[BGP & 3];
                     cBGP1.BackColor = MainDebug.defaultPal[(BGP & 12) >> 2];
                     cBGP2.BackColor = MainDebug.defaultPal[(BGP & 48) >> 4];
                     cBGP3.BackColor = MainDebug.defaultPal[(BGP & 192) >> 6];
                     break;
                 case 2:
-                    BGP = Mem.IO[0x48];
+                    BGP = Memory.readIOByte(IO.OBP0);
                     cOBP00.BackColor = MainDebug.defaultPal[BGP & 3];
                     cOBP01.BackColor = MainDebug.defaultPal[(BGP & 12) >> 2];
                     cOBP02.BackColor = MainDebug.defaultPal[(BGP & 48) >> 4];
                     cOBP03.BackColor = MainDebug.defaultPal[(BGP & 192) >> 6];
                     break;
                 case 3:
-                    BGP = Mem.IO[0x49];
+                    BGP = Memory.readIOByte(IO.OBP1);
                     cOBP10.BackColor = MainDebug.defaultPal[BGP & 3];
                     cOBP11.BackColor = MainDebug.defaultPal[(BGP & 12) >> 2];
                     cOBP12.BackColor = MainDebug.defaultPal[(BGP & 48) >> 4];
