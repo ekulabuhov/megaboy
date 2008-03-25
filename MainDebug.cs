@@ -32,9 +32,6 @@ namespace megaboy
         /* CPU  */
         Z80 CPU = new Z80();
 
-        /* Memory */
-        public static Memory Mem = new Memory();
-
         /* Misc  */
         public static int cycles = 0, autorun = 0, lbPC;
         public static int retraceCounter;
@@ -69,7 +66,7 @@ namespace megaboy
             byte[] fileBuf = new byte[fs.Length];
             fileBuf = r.ReadBytes((int)fs.Length);
             // Read first ROM page
-            Mem.copyRom(fileBuf);   
+            Memory.copyRom(fileBuf);   
             r.Close();
             fs.Close();
             // Close it
@@ -80,24 +77,24 @@ namespace megaboy
 
 
             // Display memory
-            dynamicbp = new DynamicByteProvider(Mem.RAM1);
+            dynamicbp = new DynamicByteProvider(Memory.Ram1);
             hexBox1.ByteProvider = dynamicbp;
 
             /* GameBoy starts in the VBlank mode 
              * and stays there for 17 cycles only */
             retraceCounter = 131;   // from no$gmb, originally: LY_INTERVAL
             modeCounter = 17;
-            Mem.IO[0x41] = 1;
+            Memory.writeMem(0xFF41, 1); // Write to IO
             // Create I/O window
             IOMap = new IOWindow();
             IOMap.Location = new Point(80, 60);
             IOMap.Show();
 
             VramMap = new VramViewer();
-            
-            Mem.IO[0x47] = 0xFC;    // Background Palette
-            Mem.IO[0x48] = 0xFF;    // Sprite 0 Palette
-            Mem.IO[0x49] = 0xFF;    // Sprite 1 Palette
+
+            Memory.writeMem(0xFF47, 0xFC);  // Background Palette
+            Memory.writeMem(0xFF48, 0xFF);  // Sprite 0 Palette
+            Memory.writeMem(0xFF49, 0xFF);  // Sprite 1 Palette  
 
             UpdatePalette(BGPAL);
             UpdatePalette(OBJ0PAL);
@@ -106,12 +103,12 @@ namespace megaboy
             /* Set volume to MAX, Vin to OFF
              * Set which channels to output to L/R
              * Sound is ON  */
-            Mem.IO[0x24] = 0x77;    // Sound ON-OFF / Volume
-            Mem.IO[0x25] = 0xF3;    // Selection of Sound output terminal
-            Mem.IO[0x26] = 0xF1;    // Sound on/off
+            Memory.writeMem(0xFF24, 0x77);    // Sound ON-OFF / Volume
+            Memory.writeMem(0xFF25, 0xF3);    // Selection of Sound output terminal
+            Memory.writeMem(0xFF26, 0xF1);    // Sound on/off
 
             /* LCD is ON, BG is ON */
-            Mem.IO[0x40] = 0x91;    // LCDC
+            Memory.writeMem(0xFF40, 0x91);    // LCDC
 
             UpdateIOForm();
             
@@ -155,15 +152,12 @@ namespace megaboy
             do
             {
                 CPU.step();
-                if (Mem.Changed)
-                {
-                    MessageBox.Show("memwrite\n Replace me with event!");
-                }
-
+              
+                
                 cycles += cycleTbl[CPU.instr];
                 
                 // Update cycle counters if display enabled
-                if ((Mem.IO[0x40] & IOWindow.LCDON) > 0)
+                if ((Memory.readIOByte(0x40) & IOWindow.LCDON) > 0)
                 {
                     retraceCounter -= cycles;
                     modeCounter -= cycles;
@@ -173,22 +167,26 @@ namespace megaboy
             if (retraceCounter <= 0)
             {
                 // INCREASE LY register & RESET retrace counter
-                IOWindow.IOPorts.LY++;
-                if (IOWindow.IOPorts.LY > 153)
+                byte LY = Memory.readIOByte(IO.LY);
+                LY++;
+                if (LY > 153)
                     // if overflown, reset it
-                    IOWindow.IOPorts.LY = 0;
+                    LY = 0;
 
                 retraceCounter += LY_INTERVAL;
+                Memory.writeMem(IO.LY, LY);
             }
 
             if (modeCounter <= 0)
             {
-                Mem.IO[0x41] += 1;  // LCD Stat
-                Mem.IO[0x41] &= 3;
+                byte Stat = Memory.readIOByte(IO.STAT);
+                Stat += 1;  // LCD Stat
+                Stat &= 3;
                 // if mode is V-blank, but LY not in range (144..153), skip it
-                if (((Mem.IO[0x41] & 3) == 1) && (IOWindow.IOPorts.LY < 144))
-                    Mem.IO[0x41] += 1;
-                modeCounter += modeInterval[(Mem.IO[0x41] & 3)];
+                if (((Stat & 3) == 1) && (Memory.readIOByte(IO.LY) < 144))
+                    Stat += 1;
+                modeCounter += modeInterval[(Stat & 3)];
+                Memory.Io[IO.STAT & 0xFF] = Stat;
             }
 
             if (CPU.gb_pc == breakpoint)
@@ -221,22 +219,22 @@ namespace megaboy
                 case 0x1:
                 case 0x2:
                 case 0x3:
-                    dynamicbp = new DynamicByteProvider(Mem.ROM);
+                    dynamicbp = new DynamicByteProvider(Memory.Rom);
                     dynMemMap = "ROM0";
                     dynMemOffset = 0;
                     break;
                 case 0xC:
-                    dynamicbp = new DynamicByteProvider(Mem.RAM0);
+                    dynamicbp = new DynamicByteProvider(Memory.Ram0);
                     dynMemMap = "RAM0";
                     dynMemOffset = 0xC000;
                     break;
                 case 0xD:
-                    dynamicbp = new DynamicByteProvider(Mem.RAM1);
+                    dynamicbp = new DynamicByteProvider(Memory.Ram1);
                     dynMemMap = "RAM1";
                     dynMemOffset = 0xD000;
                     break;
                 case 0xF:
-                    dynamicbp = new DynamicByteProvider(Mem.IO);
+                    dynamicbp = new DynamicByteProvider(Memory.Io);
                     dynMemMap = "IO";
                     dynMemOffset = 0xFF00;
                     dlgGoto.addr &= 0xFF;
@@ -276,7 +274,7 @@ namespace megaboy
             // We can only trace forward
             while (lbPC != PC)
             {
-                lbPC += InstrLength[Mem.readRomU8(lbPC)];
+                lbPC += InstrLength[Memory.readRomByte(lbPC)];
                 index++;
             }
             lbDisasm.TopIndex = index - 3;

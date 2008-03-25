@@ -15,9 +15,6 @@ namespace megaboy
         public delegate void smthng();
         public smthng[] op = new smthng[0xFF];
 
-        // Reference to Memory Manager?
-        Memory Mem = MainDebug.Mem;
-
         public Z80()
         {
             // Init regs
@@ -47,8 +44,6 @@ namespace megaboy
             op[0xEA] = iEA;
             op[0xF0] = iF0;
             op[0xFE] = iFE;
-
-            instr = Mem.ROM[gb_pc]; 
         }
 
         public void toggleZFlag()
@@ -74,8 +69,8 @@ namespace megaboy
 
         public void step()
         {
-            op[instr]();
-            instr = Mem.ROM[gb_pc];
+            instr = Memory.readRomByte(gb_pc);
+            op[instr]();   
         }
 
         void iNOP()
@@ -85,11 +80,7 @@ namespace megaboy
 
         void iC3()  // C3 nn nn    16 ---- jump to nn, PC=nn
         {
-            ushort addr;
-            addr = Mem.ROM[gb_pc + 2];
-            addr <<= 8;
-            addr |= Mem.ROM[gb_pc + 1];
-            gb_pc = addr;
+            gb_pc = Memory.readRomWord(gb_pc+1);
         }
 
         void iAF()  // xor  A           Ax         4 z000
@@ -101,45 +92,47 @@ namespace megaboy
 
         void i21()  // LD HL,#nnnn    12 ----  
         {
-            gb_hl = Convert.ToUInt16(Mem.ROM[++gb_pc] + (Mem.ROM[++gb_pc] << 8));
-            gb_pc++;
+            gb_hl = Memory.readRomWord(gb_pc + 1);
+            gb_pc+=3;
         }
 
         void i0E()  // LD C,#nn     8 ---- r=n
         {
             gb_bc &= 0xff00;
-            gb_bc |= Mem.ROM[++gb_pc];
+            gb_bc |= Memory.readRomByte(++gb_pc);
             gb_pc++;
         }
 
         void i06()  // LD B,#nn     8 ---- r=n
         {
             gb_bc &= 0x00ff;
-            gb_bc |= (ushort)(Mem.ROM[++gb_pc] << 8);
+            gb_bc |= (ushort)(Memory.readRomByte(++gb_pc) << 8);
             gb_pc++;
         }
 
         void i3E()  // LD A,#nn     8 ---- r=n
         {
-            gb_a = Mem.ROM[++gb_pc];
+            gb_a = Memory.readRomByte(++gb_pc);
             gb_pc++;
         }
 
         void i31()  // LD SP,#nnnn  12 ---- SP=nnnn
         {
-            gb_sp = Convert.ToUInt16(Mem.ROM[++gb_pc] + (Mem.ROM[++gb_pc] << 8));
-            gb_pc++;
+            //gb_sp = Convert.ToUInt16(Mem.ROM[++gb_pc] + (Mem.ROM[++gb_pc] << 8));
+            gb_sp = Memory.readRomWord(gb_pc);
+#warning check 31
+            gb_pc+=3;
         }
 
         void i32()  // LDD (HL),A	8 ---- (HL)=A, HL=HL-1
         {
-            Mem.writemem(gb_hl--, gb_a);
+            Memory.writeMem(gb_hl--, gb_a);
             gb_pc++;
         }
 
         void i36()  // LD (HL),#nn  12 ---- (HL)=n
         {
-            Mem.writemem(gb_hl, Mem.ROM[++gb_pc]);
+            Memory.writeMem(gb_hl, Memory.readRomByte(++gb_pc));
             gb_pc++;
         }
 
@@ -176,7 +169,7 @@ namespace megaboy
             byte addr;
             if ((gb_flgs & zF) == 0)
             {
-                addr = (byte)(Mem.ROM[gb_pc + 1] + gb_pc);
+                addr = (byte)(Memory.readRomByte(gb_pc + 1) + gb_pc);
                 gb_pc &= 0xFF00;    // Leave only high part
                 gb_pc |= addr;
                 MainDebug.cycles += 1;    
@@ -192,25 +185,26 @@ namespace megaboy
 
         void iE0()  // LD (FFnn),A  12 ---- write to io-port n (memory FF00+n)
         {
-            Mem.writemem((ushort)(0xFF00 + Mem.ROM[++gb_pc]), gb_a);
+            Memory.writeMem((ushort)(0xFF00 + Memory.readRomByte(++gb_pc)), gb_a);
             gb_pc++;
         }
 
         void iEA()  // LD (nn),A    16 ----
         {
-            Mem.writemem((ushort)(Mem.ROM[++gb_pc] + (Mem.ROM[++gb_pc] << 8)), gb_a);
-            gb_pc++;
+            Memory.writeMem((ushort)Memory.readRomWord(gb_pc+1), gb_a);
+#warning check EA
+            gb_pc+=3;
         }
 
         void iF0()  // LD A,(FFnn)  12 ---- read from io-port n (memory FF00+n)
         {
-            gb_a = Mem.readIOU8(0xFF00 + Mem.ROM[++gb_pc]);
+            gb_a = Memory.readIOByte(0xFF00 + Memory.readRomByte(++gb_pc));
             gb_pc++;
         }
 
         void iFE()  // CP A, nn     8 z1hc compare A-n
         {
-            byte cmpval = Mem.ROM[++gb_pc];
+            byte cmpval = Memory.readRomByte(++gb_pc);
             gb_flgs = nF;
 
             if (((gb_a & 0xF) - (cmpval & 0xF)) < 0)

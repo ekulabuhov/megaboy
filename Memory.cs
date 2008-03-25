@@ -4,46 +4,72 @@ using System.Text;
 
 namespace megaboy
 {
-    public class Memory
+    public static class Memory
     {
         /* Memory Map  */
-        public byte[] ROM = new byte[0x4000];
-        public byte[] RAM0 = new byte[0x1000];
-        public byte[] RAM1 = new byte[0x1000];
-        public byte[] IO = new byte[0x100];
+        static byte[] ROM = new byte[0x4000];
+        static byte[] RAM0 = new byte[0x1000];
+        static byte[] RAM1 = new byte[0x1000];
+        static byte[] IO = new byte[0x100];
 
-        Random rnd = new Random(123);
+        static Random rnd = new Random(123);
 
-        public bool Changed = false;
-        public int Address, Value;
-
-
-        public Memory()
+        static Memory()
         {
             // Fill RAM with random values
             rnd.NextBytes(RAM0);
             rnd.NextBytes(RAM1);
         }
 
-        public void copyRom(Array source)
+        public static void copyRom(Array source)
         {
             Array.ConstrainedCopy(source, 0, ROM, 0, 0x4000);
         }
 
-        public ushort readRomU16(int pos)
+        public static byte[] Rom
+        {
+            get
+            {
+                return ROM;
+            }
+        }
+        public static byte[] Ram0
+        {
+            get
+            {
+                return RAM0;
+            }
+        }
+        public static byte[] Ram1
+        {
+            get
+            {
+                return RAM1;
+            }
+        }
+        public static byte[] Io
+        {
+            get { return IO; }
+            
+        }
+
+        public static ushort readRomWord(int pos)
         {
             return (ushort)(ROM[pos] + (ROM[pos + 1] << 8));
         }
-        public byte readRomU8(int pos)
+        public static byte readRomByte(int pos)
         {
             return ROM[pos];
         }
-
-        public void writemem(ushort addr, byte value)
+        public static byte readIOByte(int addr)
         {
-            Changed = true;
-            Address = addr;
-            Value = value;
+            return IO[addr & 0xFF];
+        }
+
+
+        public static void writeMem(ushort addr, byte value)
+        {
+            // Create event memorywrite
 
             int map = addr >> 12;
 
@@ -73,7 +99,7 @@ namespace megaboy
                                     IO[0x40] = value;
                                     if ((IO[0x40] & IOWindow.LCDON) == 0)
                                     {
-                                        IOWindow.IOPorts.LY = 0;
+                                        IO[0x44] = 0;   // LY
                                         IO[0x41] = 0;
                                     }
                                     break;
@@ -104,10 +130,7 @@ namespace megaboy
             }
             //if (autorun == 0) hexBox1.Refresh();
         }
-        public byte readIOU8(int addr)
-        {
-            return IO[addr];
-        }
+
 
     }
 }

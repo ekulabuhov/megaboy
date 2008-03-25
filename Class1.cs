@@ -31,42 +31,42 @@ namespace megaboy
             {
                 case 0:
                     return "NOP";
-                case 0xC3:
-                    return String.Format("JP {0:X4}", Mem.readRomU16(CPU.gb_pc+1));
+                case 0xC3:  
+                    return String.Format("JP {0:X4}", Memory.readRomWord(CPU.gb_pc+1));
                 case 0xAF:
                     return "XOR A";
                 case 0x21:
-                    return String.Format("LD HL, ", Mem.readRomU16(CPU.gb_pc+1));
+                    return String.Format("LD HL, {0:X4}", Memory.readRomWord(CPU.gb_pc+1));
                 case 0x31:
-                    return String.Format("LD SP, ", Mem.readRomU16(CPU.gb_pc + 1));
+                    return String.Format("LD SP, {0:X4}", Memory.readRomWord(CPU.gb_pc + 1));
                 case 0xe:
-                    return String.Format("LD C, {0:X2}", Mem.readRomU8(CPU.gb_pc+1));
+                    return String.Format("LD C, {0:X2}", Memory.readRomByte(CPU.gb_pc+1));
                 case 6:
-                    return String.Format("LD B, {0:X2}", Mem.readRomU8(CPU.gb_pc+1));
+                    return String.Format("LD B, {0:X2}", Memory.readRomByte(CPU.gb_pc+1));
                 case 0x3e:
-                    return String.Format("LD A, {0:X2}", Mem.readRomU8(CPU.gb_pc+1));
+                    return String.Format("LD A, {0:X2}", Memory.readRomByte(CPU.gb_pc+1));
                 case 0x32:
                     return "LDD (HL), A";
                 case 0x36:
-                    return String.Format("LD (HL),{0:X2}", Mem.readRomU8(CPU.gb_pc + 1));
+                    return String.Format("LD (HL),{0:X2}", Memory.readRomByte(CPU.gb_pc + 1));
                 case 5:
                     return "DEC B";
                 case 0xd:
                     return "DEC C";
                 case 0x20:
-                    return AsmForm("JR NZ, ", (ushort)(CPU.gb_pc + Mem.readRomU8(CPU.gb_pc+1) - 0xfe));
+                    return AsmForm("JR NZ, ", (ushort)(CPU.gb_pc + Memory.readRomByte(CPU.gb_pc+1) - 0xfe));
                 case 0xF3:
                     return "DI";
                 case 0xFF:
                     return "RST 0x38";
                 case 0xE0:
-                    return String.Format("LD (FF00+{0:X2}),a  ;{1}", Mem.readRomU8(CPU.gb_pc + 1), IOPortDesc[Mem.readRomU8(CPU.gb_pc+1)]);
+                    return String.Format("LD (FF00+{0:X2}),a  ;{1}", Memory.readRomByte(CPU.gb_pc + 1), IOPortDesc[Memory.readRomByte(CPU.gb_pc+1)]);
                 case 0xEA:
-                    return String.Format("LD ({0:X4}),a", Mem.readRomU16(CPU.gb_pc+1));
+                    return String.Format("LD ({0:X4}),a", Memory.readRomWord(CPU.gb_pc+1));
                 case 0xF0:
-                    return String.Format("LD a,(FF00+{0:X2})  ;{1}", Mem.readRomU8(CPU.gb_pc + 1), Mem.readRomU8(CPU.gb_pc + 1));
+                    return String.Format("LD a,(FF00+{0:X2})  ;{1}", Memory.readRomByte(CPU.gb_pc + 1), IOPortDesc[Memory.readRomByte(CPU.gb_pc + 1)]);
                 case 0xFE:
-                    return String.Format("CP {0:X2}",Mem.readRomU8(CPU.gb_pc + 1));
+                    return String.Format("CP {0:X2}",Memory.readRomByte(CPU.gb_pc + 1));
             }
             return "undefined";
         }
@@ -87,10 +87,10 @@ namespace megaboy
             
             for (int i = 0; i <= 1024; i++)
             {
-                curInstr = new byte[InstrLength[Mem.readRomU8(CPU.gb_pc)]];
-                Array.ConstrainedCopy(Mem.ROM, CPU.gb_pc, curInstr, 0, InstrLength[Mem.readRomU8(CPU.gb_pc)]);
-                lbDisasm.Items.Add(string.Format("ROM0:{0:X4} {1,-10} {2,-15} ;{3}", CPU.gb_pc, BitConverter.ToString(curInstr, 0), AsmDisc(Mem.readRomU8(CPU.gb_pc)), cycleTbl[curInstr[0]]));
-                CPU.gb_pc += InstrLength[Mem.readRomU8(CPU.gb_pc)];
+                curInstr = new byte[InstrLength[Memory.readRomByte(CPU.gb_pc)]];
+                Array.ConstrainedCopy(Memory.Rom, CPU.gb_pc, curInstr, 0, InstrLength[Memory.readRomByte(CPU.gb_pc)]);
+                lbDisasm.Items.Add(string.Format("ROM0:{0:X4} {1,-10} {2,-15} ;{3}", CPU.gb_pc, BitConverter.ToString(curInstr, 0), AsmDisc(Memory.readRomByte(CPU.gb_pc)), cycleTbl[curInstr[0]]));
+                CPU.gb_pc += InstrLength[Memory.readRomByte(CPU.gb_pc)];
 
                 // Position table for faster access
                 if (CPU.gb_pc >= (m) * 50)
