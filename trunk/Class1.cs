@@ -22,8 +22,7 @@ namespace megaboy
         /*-----------------------------------------*/
 
         /* Add here the names of the functions to
-         * display near it`s hex representation 
-         * Why the fuck am I using AsmForm?  */
+         * display near it`s hex representation */
         string AsmDisc(byte instr)
         {
             
@@ -84,7 +83,9 @@ namespace megaboy
             CPU.gb_pc = 0;
             int m = 0;
             byte[] curInstr = new byte[3];
-            
+
+            // Shutdown repainting
+            lbDisasm.BeginUpdate();
             for (int i = 0; i <= 1024; i++)
             {
                 curInstr = new byte[InstrLength[Memory.readRomByte(CPU.gb_pc)]];
@@ -100,6 +101,7 @@ namespace megaboy
                     m++;
                 }
             }
+            lbDisasm.EndUpdate();
             lbDisasm.SelectedIndex = 0;
             CPU.gb_pc = 0x100;  // restore counter
             GotoPC(0x100);

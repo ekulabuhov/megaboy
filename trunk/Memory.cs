@@ -65,34 +65,34 @@ namespace megaboy
         {
             return IO[addr & 0xFF];
         }
+        public static void setIO(ushort addr, byte value)
+        {
+            // Only for unmanaged writes
+            IO[addr & 0xFF] = value;
+        }
 
 
         public static void writeMem(ushort addr, byte value)
         {
             // Create event memorywrite
+            // Move dynamicbp and hexbox.refresh there
 
             int map = addr >> 12;
+
+            MainDebug.dynamicbp.WriteByte(addr, value);
 
             switch (map)
             {
                 case 0xC:       // RAM0
                     RAM0[addr & 0xFFF] = value;
-                    if (MainDebug.dynMemOffset == 0xC000)
-                        MainDebug.dynamicbp.WriteByte(addr & 0xFFF, value);
                     break;
                 case 0xD:       // RAM1
                     RAM1[addr & 0xFFF] = value;
-                    if (MainDebug.dynMemOffset == 0xD000)
-                        MainDebug.dynamicbp.WriteByte(addr & 0xFFF, value);
                     break;
                 case 0xF:
                     switch (addr & 0xFF00)
                     {
                         case 0xFF00:    // I/O                            
-                            if (MainDebug.dynMemOffset == 0xFF00)
-                                /* update only if we`re viewing IO region */
-                                MainDebug.dynamicbp.WriteByte(addr & 0xFF, value);
-
                             switch (addr & 0xFF)
                             {
                                 case 0x40:  // LCD Control

@@ -118,9 +118,7 @@ namespace megaboy
 
         void i31()  // LD SP,#nnnn  12 ---- SP=nnnn
         {
-            //gb_sp = Convert.ToUInt16(Mem.ROM[++gb_pc] + (Mem.ROM[++gb_pc] << 8));
             gb_sp = Memory.readRomWord(gb_pc);
-#warning check 31
             gb_pc+=3;
         }
 
@@ -192,7 +190,6 @@ namespace megaboy
         void iEA()  // LD (nn),A    16 ----
         {
             Memory.writeMem((ushort)Memory.readRomWord(gb_pc+1), gb_a);
-#warning check EA
             gb_pc+=3;
         }
 
