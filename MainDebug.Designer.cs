@@ -55,6 +55,10 @@ namespace megaboy
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.iOMapToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.paletteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.stepToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.runToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.addBreakToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMHex.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.contextMAsm.SuspendLayout();
@@ -69,7 +73,7 @@ namespace megaboy
             this.bNext.TabIndex = 0;
             this.bNext.Text = "Next";
             this.bNext.UseVisualStyleBackColor = true;
-            this.bNext.Click += new System.EventHandler(this.button1_Click);
+            this.bNext.Click += new System.EventHandler(this.bNext_Click);
             // 
             // lAF
             // 
@@ -237,6 +241,7 @@ namespace megaboy
             // lbDisasm
             // 
             this.lbDisasm.ContextMenuStrip = this.contextMAsm;
+            this.lbDisasm.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.lbDisasm.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.lbDisasm.FormattingEnabled = true;
             this.lbDisasm.ItemHeight = 15;
@@ -246,6 +251,9 @@ namespace megaboy
             this.lbDisasm.Size = new System.Drawing.Size(381, 109);
             this.lbDisasm.TabIndex = 10;
             this.lbDisasm.Tag = "0";
+            this.lbDisasm.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lbDisasm_MouseDoubleClick);
+            this.lbDisasm.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.lbDisasm_DrawItem);
+            this.lbDisasm.MouseDown += new System.Windows.Forms.MouseEventHandler(this.lbDisasm_MouseDown);
             // 
             // contextMAsm
             // 
@@ -253,27 +261,28 @@ namespace megaboy
             this.goToMenuItemAsm,
             this.addBreakpointToolStripMenuItem});
             this.contextMAsm.Name = "contextMAsm";
-            this.contextMAsm.Size = new System.Drawing.Size(135, 48);
+            this.contextMAsm.Size = new System.Drawing.Size(148, 48);
             // 
             // goToMenuItemAsm
             // 
             this.goToMenuItemAsm.Name = "goToMenuItemAsm";
-            this.goToMenuItemAsm.Size = new System.Drawing.Size(134, 22);
+            this.goToMenuItemAsm.Size = new System.Drawing.Size(147, 22);
             this.goToMenuItemAsm.Text = "Go to ...";
             this.goToMenuItemAsm.Click += new System.EventHandler(this.goToMenuItemAsm_Click);
             // 
             // addBreakpointToolStripMenuItem
             // 
             this.addBreakpointToolStripMenuItem.Name = "addBreakpointToolStripMenuItem";
-            this.addBreakpointToolStripMenuItem.Size = new System.Drawing.Size(134, 22);
-            this.addBreakpointToolStripMenuItem.Text = "Add Break";
+            this.addBreakpointToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.addBreakpointToolStripMenuItem.Text = "Toggle Break";
             this.addBreakpointToolStripMenuItem.Click += new System.EventHandler(this.addBreakpointToolStripMenuItem_Click);
             // 
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItem1,
-            this.toolStripMenuItem2});
+            this.toolStripMenuItem2,
+            this.debugToolStripMenuItem});
             this.menuStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -301,16 +310,49 @@ namespace megaboy
             // 
             this.iOMapToolStripMenuItem.Name = "iOMapToolStripMenuItem";
             this.iOMapToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F10;
-            this.iOMapToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.iOMapToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
             this.iOMapToolStripMenuItem.Text = "I/O Map";
             this.iOMapToolStripMenuItem.Click += new System.EventHandler(this.iOMapToolStripMenuItem_Click);
             // 
             // paletteToolStripMenuItem
             // 
             this.paletteToolStripMenuItem.Name = "paletteToolStripMenuItem";
-            this.paletteToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.paletteToolStripMenuItem.Size = new System.Drawing.Size(149, 22);
             this.paletteToolStripMenuItem.Text = "Palette";
             this.paletteToolStripMenuItem.Click += new System.EventHandler(this.paletteToolStripMenuItem_Click);
+            // 
+            // debugToolStripMenuItem
+            // 
+            this.debugToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.stepToolStripMenuItem,
+            this.runToolStripMenuItem,
+            this.addBreakToolStripMenuItem});
+            this.debugToolStripMenuItem.Name = "debugToolStripMenuItem";
+            this.debugToolStripMenuItem.Size = new System.Drawing.Size(50, 20);
+            this.debugToolStripMenuItem.Text = "Debug";
+            // 
+            // stepToolStripMenuItem
+            // 
+            this.stepToolStripMenuItem.Name = "stepToolStripMenuItem";
+            this.stepToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F7;
+            this.stepToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.stepToolStripMenuItem.Text = "Step";
+            this.stepToolStripMenuItem.Click += new System.EventHandler(this.stepToolStripMenuItem_Click);
+            // 
+            // runToolStripMenuItem
+            // 
+            this.runToolStripMenuItem.Name = "runToolStripMenuItem";
+            this.runToolStripMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F9;
+            this.runToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.runToolStripMenuItem.Text = "Run";
+            this.runToolStripMenuItem.Click += new System.EventHandler(this.runToolStripMenuItem_Click);
+            // 
+            // addBreakToolStripMenuItem
+            // 
+            this.addBreakToolStripMenuItem.Name = "addBreakToolStripMenuItem";
+            this.addBreakToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.addBreakToolStripMenuItem.Text = "Add Break";
+            this.addBreakToolStripMenuItem.Click += new System.EventHandler(this.addBreakToolStripMenuItem_Click);
             // 
             // MainDebug
             // 
@@ -378,6 +420,10 @@ namespace megaboy
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
         private System.Windows.Forms.ToolStripMenuItem iOMapToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem paletteToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem debugToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem stepToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem runToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem addBreakToolStripMenuItem;
     }
 }
 
