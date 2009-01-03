@@ -4,6 +4,10 @@
 When implementing timing, you`ll probably divide real cycles by 4. In this document, if not specified different, than the value is divided.
 
 == Screen renderer ==
+ # Line rendering starts from mode 1, sprite memory processing happens at that time, mode longs 80 CPU cycles.
+ # Renderer goes in mode 2 and reads data from video memory, time spent in this mode depends on sprite count in current line, and will vary from 169 to 376 CPU cycles.
+ # Interrupt signal indicating end of line draw (horizontal blank) is sent every 456 CPU cycles.
+
 Modes cycle from 1 to 3, until screen renderer goes off the screen (indicated by LY register when it is equal to 144), then mode 0 is enabled. LY is still increased every 114 cycles. 
 
 == LCD is OFF ==
