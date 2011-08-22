@@ -15,6 +15,7 @@
   
 #include	"msp430g2231.h"
 #include	"stdbool.h"
+#include	"common.h"
 
 #define		TXD             BIT1    // TXD on P1.1
 #define		RXD		BIT2	// RXD on P1.2
@@ -33,14 +34,12 @@ bool hasReceived;		// Lets the program know when a byte is received
 void Transmit(void);
 
 void UART_Setup(void)
-{
-	WDTCTL = WDTPW + WDTHOLD;		// Stop WDT
-  
+{  
 	BCSCTL1 = CALBC1_1MHZ;			// Set range
 	DCOCTL = CALDCO_1MHZ;			// SMCLK = DCO = 1MHz  
 
 	P1SEL |= TXD;
-	P1DIR |= TXD;
+	P1DIR = TXD;
 
 	P1IES |= RXD;				// RXD Hi/lo edge interrupt
 	P1IFG &= ~RXD;				// Clear RXD (flag) before enabling interrupt
@@ -50,10 +49,12 @@ void UART_Setup(void)
 	hasReceived = false;
   
 	__bis_SR_register(GIE);			// interrupts enabled
+	
+	_delay_cycles(1500);	// The TX line is shared, wait until receiving UART resets byte.
 }
 
 // Function Transmits Character from TXByte 
-void UART_Transmit(unsigned char txByte)
+void UART_putc(unsigned char txByte)
 { 
 	while(isReceiving);			// Wait for RX completion
   	CCTL0 = OUT;				// TXD Idle as Mark
@@ -71,13 +72,31 @@ void UART_Transmit(unsigned char txByte)
   	while ( CCTL0 & CCIE );			// Wait for previous TX completion
 }
 
-unsigned char UART_Receive()
+unsigned char UART_getc()
 {
 	while(hasReceived == false);
 	
 	hasReceived = false;	// clear the flag
 	
 	return RXByte;
+}
+
+byte UART_buffer[10];
+
+/*
+ * Reads data from UART until Return character (0xd) is encontered.
+ * Data is stored into fixed UART_buffer array.
+ */
+void UART_gets()
+{
+	byte rxByte, i = 0;
+	
+	do
+	{
+		rxByte = UART_getc();
+		UART_buffer[i++] = rxByte; 
+		UART_putc(rxByte);	// Echo to console
+	} while(rxByte != 0xd);	// EOL (CR)	
 }
 
 // Port 1 interrupt service routine
