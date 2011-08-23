@@ -25,6 +25,8 @@
 
 void Flash_Setup()
 {
+	__bic_SR_register(GIE);	// Disable interrupts.
+	
 	P1SEL = 0;
 	
 	P1DIR = 0xBF;	// Everything is output, except P1.6 0b10111111 = 0xBF
@@ -72,6 +74,26 @@ void outputParallel(byte value)
 	SET_RCLK(0);	
 }
 
+/*
+ * Command sequence to activate Command Interface Register used for selecting modes on Flash.
+ */
+void selectCIR()
+{
+	outputParallel(0x55); 	// A0-A7
+	outputParallel(0x55); 	// A8-A15
+	outputParallel(0xAA); 	// D0-D7
+	SET_WE(0);				// Write Enable on FLASH is used as a clock
+	//_delay_cycles(20000);
+	SET_WE(1);
+	
+	outputParallel(0xAA);
+	outputParallel(0x2A);
+	outputParallel(0x55);
+	SET_WE(0);
+	//_delay_cycles(20000);
+	SET_WE(1);
+}
+
 byte readParallel(void)
 {
 	SET_S1(1);	// Enable parallel loading on 299
@@ -110,20 +132,8 @@ byte readParallel(void)
  */
 byte Flash_ReadSiliconId(enum SiliconIdReadModes readMode)
 {
-	outputParallel(0x55); 	// A0-A7
-	outputParallel(0x55); 	// A8-A15
-	outputParallel(0xAA); 	// D0-D7
-	SET_WE(0);				// Write Enable on FLASH is used as a clock
-	_delay_cycles(20000);
-	SET_WE(1);
-	
-	outputParallel(0xAA);
-	outputParallel(0x2A);
-	outputParallel(0x55);
-	SET_WE(0);
-	_delay_cycles(20000);
-	SET_WE(1);
-	
+	selectCIR();
+		
 	outputParallel(0x55);
 	outputParallel(0x55);
 	outputParallel(0x90);
@@ -143,19 +153,7 @@ byte Flash_ReadSiliconId(enum SiliconIdReadModes readMode)
 
 void resetToReadMode()
 {
-	outputParallel(0x55); 	// A0-A7
-	outputParallel(0x55); 	// A8-A15
-	outputParallel(0xAA); 	// D0-D7
-	SET_WE(0);
-	_delay_cycles(20000);
-	SET_WE(1);
-	
-	outputParallel(0xAA);
-	outputParallel(0x2A);
-	outputParallel(0x55);
-	SET_WE(0);
-	_delay_cycles(20000);
-	SET_WE(1);
+	selectCIR();
 	
 	outputParallel(0x55);
 	outputParallel(0x55);
@@ -186,5 +184,77 @@ void Flash_ReadData(int page)
 		
 		Flash_buffer[i] = value;
 	}	
+}
+
+/*
+ * There are 32 sectors in the flash.
+ * SA0 - 0x00000 - 0x0FFFF
+ * SA1 - 0x10000 - 0x1FFFF
+ * As I don't have control over A16-A20 lines, this function will always erase SA0.
+ */
+void Flash_SectorErase()
+{
+	SET_OE(1);	// Disable outputs.
+	
+	selectCIR();
+	
+	outputParallel(0x55); 	// A0-A7
+	outputParallel(0x55); 	// A8-A15
+	outputParallel(0x80); 	// D0-D7
+	SET_WE(0);
+	_delay_cycles(20000);
+	SET_WE(1);
+	
+	outputParallel(0x55); 	// A0-A7
+	outputParallel(0x55); 	// A8-A15
+	outputParallel(0xAA); 	// D0-D7
+	SET_WE(0);
+	_delay_cycles(20000);
+	SET_WE(1);
+	
+	outputParallel(0xAA); 	// A0-A7
+	outputParallel(0x2A); 	// A8-A15
+	outputParallel(0x55); 	// D0-D7
+	SET_WE(0);
+	_delay_cycles(20000);
+	SET_WE(1);
+	
+	// A16-A20 - is the sector address.
+	outputParallel(0x0); 	// A0-A7 - don't care
+	outputParallel(0x0); 	// A8-A15 - don't care
+	outputParallel(0x30); 	// D0-D7
+	SET_WE(0);
+	_delay_cycles(20000);
+	SET_WE(1);					
+}
+
+void Flash_Program()
+{
+	SET_OE(1);	// Disable outputs.
+		
+	selectCIR();	
+
+	outputParallel(0x55); 	// A0-A7
+	outputParallel(0x55); 	// A8-A15
+	outputParallel(0xA0); 	// D0-D7
+	SET_WE(0);
+	SET_WE(1);	
+	
+	outputParallel(0x06); 	// A0-A7
+	outputParallel(0x00); 	// A8-A15
+	outputParallel(0xCC); 	// D0-D7
+	SET_WE(0);
+	SET_WE(1);
+	
+	/* The second write should be within 30us from first write.
+	 * At 1MHz I have only 30 cycles between events (1clk=1us).
+	 * Either increase clock speed or remove delays by optimizing outputParallel.
+	 * Check compiler optimization options.
+	 */
+	outputParallel(0x07); 	// A0-A7
+	outputParallel(0x00); 	// A8-A15
+	outputParallel(0xDD); 	// D0-D7
+	SET_WE(0);
+	SET_WE(1);			
 }
 
