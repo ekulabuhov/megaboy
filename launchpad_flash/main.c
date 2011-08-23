@@ -25,17 +25,15 @@ void main(void)
 	int i = 0;
 	 
 	WDTCTL = WDTPW + WDTHOLD;	// Disable Watchdog
-	
-	UART_Setup();
-	
+		
 	while(1)
-	{		
+	{
+		UART_Setup();		
 		UART_gets();	// Read the data from UART to UART_buffer.
+		Flash_Setup();
 		
 		if ((UART_buffer[0] == 'I') && (UART_buffer[1] == 'D'))
-		{
-			Flash_Setup();
-			
+		{	
 			byte manufacturerCode = Flash_ReadSiliconId(MANUFACTURER_CODE);
 			byte deviceId = Flash_ReadSiliconId(DEVICE_CODE);
 			
@@ -50,7 +48,6 @@ void main(void)
 		}
 		else if (UART_buffer[0] == 'R')	// R - is for Read. R0 will return 10 bytes from 0 to 9.
 		{
-			Flash_Setup();
 			Flash_ReadData(UART_buffer[1]-0x30);
 			
 			UART_Setup();
@@ -58,6 +55,14 @@ void main(void)
 			{
 				UART_putc(Flash_buffer[i]);
 			}
+		}
+		else if (UART_buffer[0] == 'E')
+		{
+			Flash_SectorErase();
+		}
+		else if (UART_buffer[0] == 'W')
+		{
+			Flash_Program();
 		}
 		else	
 			while(1);

@@ -6,6 +6,8 @@ enum SiliconIdReadModes {MANUFACTURER_CODE = 0, DEVICE_CODE = 1};
 void Flash_Setup();
 byte Flash_ReadSiliconId(enum SiliconIdReadModes readMode);
 void Flash_ReadData(int offset);
+void Flash_SectorErase();
+void Flash_Program();
 
 extern byte Flash_buffer[];
 
