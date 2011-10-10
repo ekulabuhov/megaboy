@@ -3,15 +3,15 @@
 #include "flash.h"
 
 // Serial input for shifters
-#define SET_SI(x) P1OUT&=~BIT0; if(x) P1OUT|=BIT0;
+#define SET_SI(x) if (!x) P1OUT&=~BIT0; else P1OUT|=BIT0;
 // Serial clock for shifters
-#define SET_SCLK(x) P1OUT&=~BIT1; if(x) P1OUT|=BIT1;
+#define SET_SCLK(x) if (!x) P1OUT&=~BIT1; else P1OUT|=BIT1;
 // Latch for shifters
-#define SET_RCLK(x) P1OUT&=~BIT2; if(x) P1OUT|=BIT2;
+#define SET_RCLK(x) if (!x) P1OUT&=~BIT2; else P1OUT|=BIT2;
 // Mode selector for 299. Set to 1 for parallel load, set to 0 for right shifting.
-#define SET_S1(x) if (!x) P1OUT&=~BIT3; else P1OUT|=BIT3
+#define SET_S1(x) if (!x) P1OUT&=~BIT3; else P1OUT|=BIT3;
 // LED2 on Launchpad
-#define SET_LED2(x) P1OUT&=~BIT6; if(x) P1OUT|=BIT6;
+#define SET_LED2(x) if (!x) P1OUT&=~BIT6; else P1OUT|=BIT6;
 // Button on Launchpad. Shared pin with S1.
 #define BUTTON !(P1IN & BIT3)
 // Write Enable (inverted) on Flash. Used as a clock between commands.
@@ -26,6 +26,10 @@
 void Flash_Setup()
 {
 	__bic_SR_register(GIE);	// Disable interrupts.
+
+	// MCLK to 10Mhz
+	DCOCTL = DCO1 + DCO0 + DCO2;	// DCO = 7
+	BCSCTL1 = RSEL3 + RSEL2 + RSEL0 + XT2OFF; // RSEL = 13;
 	
 	P1SEL = 0;
 	
@@ -97,6 +101,7 @@ void selectCIR()
 byte readParallel(void)
 {
 	SET_S1(1);	// Enable parallel loading on 299
+	_delay_cycles(500);
 	SET_OE(0);	// Enable Flash ROM data outputs
 	
 	// Trigger clock to read Flash data to 299
@@ -138,14 +143,14 @@ byte Flash_ReadSiliconId(enum SiliconIdReadModes readMode)
 	outputParallel(0x55);
 	outputParallel(0x90);
 	SET_WE(0);
-	_delay_cycles(20000);
+	//_delay_cycles(20000);
 	SET_WE(1);
 	
 	outputParallel(readMode);
 	outputParallel(0x00);
 	outputParallel(0x00);
 	SET_WE(0);
-	_delay_cycles(20000);
+	//_delay_cycles(20000);
 	SET_WE(1);
 		
 	return readParallel();
@@ -240,9 +245,9 @@ void Flash_Program()
 	SET_WE(0);
 	SET_WE(1);	
 	
-	outputParallel(0x06); 	// A0-A7
+	outputParallel(0x07); 	// A0-A7
 	outputParallel(0x00); 	// A8-A15
-	outputParallel(0xCC); 	// D0-D7
+	outputParallel(0x22); 	// D0-D7
 	SET_WE(0);
 	SET_WE(1);
 	
@@ -250,10 +255,13 @@ void Flash_Program()
 	 * At 1MHz I have only 30 cycles between events (1clk=1us).
 	 * Either increase clock speed or remove delays by optimizing outputParallel.
 	 * Check compiler optimization options.
+	 * 1s = 1000ms
+	 * 1ms = 1000us
+	 * 1us = 1000ns
 	 */
-	outputParallel(0x07); 	// A0-A7
+	outputParallel(0x08); 	// A0-A7
 	outputParallel(0x00); 	// A8-A15
-	outputParallel(0xDD); 	// D0-D7
+	outputParallel(0x44); 	// D0-D7
 	SET_WE(0);
 	SET_WE(1);			
 }
