@@ -21,8 +21,6 @@
 // Input from 299 shifter, used for reading input data from Flash Q0-Q7
 #define Q7 (P1IN & BIT6)
 
-#define USING_74HC299
-
 void Flash_Setup()
 {
 	__bic_SR_register(GIE);	// Disable interrupts.
@@ -49,12 +47,6 @@ void Flash_Setup()
 
 void outputParallel(byte value)
 {
-	#ifdef USING_74HC299
-		// 299 has !OE1 and !OE2 that do the same as RCLK.
-		// Setting these pins to high will disable outputs.
-		SET_RCLK(1); 
-	#endif
-	
 	byte bitNumber = 0;
 	for (bitNumber = 0; bitNumber<8; bitNumber++)
 	{
