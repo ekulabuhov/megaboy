@@ -2,6 +2,8 @@
 #include "common.h"
 #include "flash.h"
 
+extern void outputParallel(unsigned char value);
+
 // Serial input for shifters
 #define SET_SI(x) if (!x) P1OUT&=~BIT0; else P1OUT|=BIT0;
 // Serial clock for shifters
@@ -43,31 +45,6 @@ void Flash_Setup()
 	
 	SET_S1(0);
 	SET_OE(1);	
-}
-
-void outputParallel(byte value)
-{
-	byte bitNumber = 0;
-	for (bitNumber = 0; bitNumber<8; bitNumber++)
-	{
-		SET_SCLK(0);
-		
-		byte byteMask = 0x80 >> bitNumber;
-		if (value & byteMask)
-		{
-			SET_SI(1);
-		}
-		else
-		{
-			SET_SI(0);
-		}
-		
-		SET_SCLK(1);
-	}	
-	
-	SET_SCLK(0);
-	SET_RCLK(1);
-	SET_RCLK(0);	
 }
 
 /*
@@ -237,7 +214,7 @@ void Flash_Program()
 	SET_WE(0);
 	SET_WE(1);	
 	
-	outputParallel(0x07); 	// A0-A7
+	outputParallel(0x08); 	// A0-A7
 	outputParallel(0x00); 	// A8-A15
 	outputParallel(0x22); 	// D0-D7
 	SET_WE(0);
@@ -251,9 +228,9 @@ void Flash_Program()
 	 * 1ms = 1000us
 	 * 1us = 1000ns
 	 */
-	outputParallel(0x08); 	// A0-A7
+	outputParallel(0x09); 	// A0-A7
 	outputParallel(0x00); 	// A8-A15
-	outputParallel(0x44); 	// D0-D7
+	outputParallel(0xEE); 	// D0-D7
 	SET_WE(0);
 	SET_WE(1);			
 }
