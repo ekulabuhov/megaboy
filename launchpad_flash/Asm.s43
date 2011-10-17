@@ -1,0 +1,26 @@
+#include <msp430g2231.h>
+
+  PUBLIC outputParallel
+  RSEG CODE
+
+outputParallel; 
+  MOV #8, R13
+loop;
+  BIC.B #BIT1, P1OUT    ; SET_SCLK(0)
+  RLA.B R12
+  JC setBit
+  BIC.B #BIT0, P1OUT     ; SET_SI(0)
+  JMP toggleClock
+setBit;
+  BIS.B #BIT0, P1OUT      ; SET_SI(1)
+toggleClock;
+  BIS.B #BIT1, P1OUT      ; SET_SCLK(1)
+  DEC R13
+  JNZ loop
+  
+  BIC.B #BIT1, P1OUT    ; SET_SCLK(0)
+  BIS.B #BIT2, P1OUT    ; SET_RCLK(1)
+  BIC.B #BIT2, P1OUT    ; SET_RCLK(0)  
+  ret
+
+END
