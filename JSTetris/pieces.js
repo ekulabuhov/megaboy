@@ -11,7 +11,7 @@
  */
 game.pieces.getBlockType = function (piece, rotation, x, y) {
 	return game.pieces.pieces[piece][rotation][x][y];
-}
+};
 
 /**
 * Returns the horizontal displacement of the piece that has to be applied in order to create it in the
@@ -23,7 +23,7 @@ game.pieces.getBlockType = function (piece, rotation, x, y) {
 */
 game.pieces.getXInitialPosition = function (piece, rotation) {
 	return game.pieces.initialPosition[piece][rotation][0];
-}
+};
 
 /**
 * Returns the vertical displacement of the piece that has to be applied in order to create it in the
@@ -35,7 +35,7 @@ game.pieces.getXInitialPosition = function (piece, rotation) {
 */
 game.pieces.getYInitialPosition = function (piece, rotation) {
 	return game.pieces.initialPosition[piece][rotation][1];
-}
+};
 
 game.pieces.pieces =
 [
