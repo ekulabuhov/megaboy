@@ -81,8 +81,8 @@ game.drawPiece = function (x, y, piece, rotation) {
 			// Get the type of the block and draw it with the correct color
 			switch (game.pieces.getBlockType (this.piece, this.rotation, j, i))
 			{
-				case 1: color = Color.GREEN; break;	// For each block of the piece except the pivot
-				case 2: color = Color.BLUE; break;	// For the pivot
+				case 1: color = game.Color.GREEN; break;	// For each block of the piece except the pivot
+				case 2: color = game.Color.BLUE; break;	// For the pivot
 			}
 
 			if (game.pieces.getBlockType (this.piece, this.rotation, j, i) != 0)
@@ -101,43 +101,42 @@ game.drawPiece = function (x, y, piece, rotation) {
  * Then draws the board blocks that are flagged as POS_FILLED in a nested loop.
  */
 game.drawBoard = function () {
+	var screenHeight = game.io.getScreenHeight();
 	// Calculate the limits of the board in pixels
 	var x1 = game.board.BOARD_POSITION - (game.board.BLOCK_SIZE * (game.board.BOARD_WIDTH / 2)) - 1;
 	var x2 = game.board.BOARD_POSITION + (game.board.BLOCK_SIZE * (game.board.BOARD_WIDTH / 2));
-	var y = mScreenHeight - (game.board.BLOCK_SIZE * game.board.BOARD_HEIGHT);
+	var y = screenHeight - (game.board.BLOCK_SIZE * game.board.BOARD_HEIGHT);
 
 	// Check that the vertical margin is not to small
 	//assert (mY > MIN_VERTICAL_MARGIN);
 
 	// Rectangles that delimits the board
-	game.io.drawRectangle (mX1 - game.board.BOARD_LINE_WIDTH, mY, mX1, mScreenHeight - 1, BLUE);
+	game.io.drawRectangle(x1 - game.board.BOARD_LINE_WIDTH, y, x1, screenHeight - 1, game.Color.BLUE);
 
-	game.io.drawRectangle (mX2, mY, mX2 + game.board.BOARD_LINE_WIDTH, mScreenHeight - 1, BLUE);
+	game.io.drawRectangle(x2, y, x2 + game.board.BOARD_LINE_WIDTH, screenHeight - 1, game.Color.BLUE);
 
 	// Check that the horizontal margin is not to small
 	//assert (mX1 > MIN_HORIZONTAL_MARGIN);
 
 	// Drawing the blocks that are already stored in the board
-	mX1 += 1;
-	for (var i = 0; i < game.board.BOARD_WIDTH; i++)
-	{
-	for (var j = 0; j < game.board.BOARD_HEIGHT; j++)
-	{
-	// Check if the block is filled, if so, draw it
-	if (game.boar.isFreeBlock(i, j))
-	game.io.drawRectangle (	mX1 + i * game.board.BLOCK_SIZE,
-	mY + j * game.board.BLOCK_SIZE,
-	(mX1 + i * game.board.BLOCK_SIZE) + game.board.BLOCK_SIZE - 1,
-	(mY + j * game.board.BLOCK_SIZE) + game.board.BLOCK_SIZE - 1,
-	RED);
-	}
+	x1 += 1;
+	for (var i = 0; i < game.board.BOARD_WIDTH; i++) {
+		for (var j = 0; j < game.board.BOARD_HEIGHT; j++) {
+			// Check if the block is filled, if so, draw it
+			if (game.board.isFreeBlock(i, j) == false)
+				game.io.drawRectangle(x1 + i * game.board.BLOCK_SIZE,
+	y + j * game.board.BLOCK_SIZE,
+	(x1 + i * game.board.BLOCK_SIZE) + game.board.BLOCK_SIZE - 1,
+	(y + j * game.board.BLOCK_SIZE) + game.board.BLOCK_SIZE - 1,
+	game.Color.RED);
+		}
 	}
 };
 
 game.drawScene = function () {
 	game.drawBoard ();	 // Draw the delimitation lines and blocks stored in the board
 	game.drawPiece (this.posX, this.posY, this.piece, this.rotation);	 // Draw the playing piece
-	game.drawPiece (this.nextPosX, this.nextPosY, this.nextPiece, this.nextRotation);	// Draw the next piece
+	game.drawPiece (this.nextPosX_, this.nextPosY_, this.nextPiece_, this.nextRotation_);	// Draw the next piece
 };
 
 //var Game = (function () {

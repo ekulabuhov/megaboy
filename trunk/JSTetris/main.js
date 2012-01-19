@@ -8,21 +8,30 @@ Main
 */
 game.main.run = function () {
 
-// Class for drawing staff, it uses SDL for the rendering. Change the methods of this class
-// in order to use a different renderer
-var screenHeight = game.io.getScreenHeight();
+	// Class for drawing staff, it uses SDL for the rendering. Change the methods of this class
+	// in order to use a different renderer
+	var screenHeight = game.io.getScreenHeight();
 
-// Board
-game.board.screenHeight = screenHeight;
-game.board.initBoard();
+	// Board
+	game.board.initBoard();
 
-}
-// Game
-//Game mGame (&mBoard, &mPieces, &mIO, mScreenHeight);
+	// Game
+	game.initGame();
 
-//// Get the actual clock milliseconds (SDL)
-//unsigned long mTime1 = SDL_GetTicks();
-//[/code]
+	// Get the actual clock milliseconds
+	var time1 = new Date().getTime();
+
+	//This is the main loop. We can exit by pressing ESC. In each frame we clear and update the screen and draw everything.
+
+	while (game.io.isKeyDown("esc") == false) {
+		// ----- Draw -----
+		game.io.clearScreen(); // Clear screen
+		game.drawScene();	 // Draw staff
+		game.io.updateScreen ();	 // Put the graphic context in the screen
+	}
+};
+
+
 
 //This is the main loop. We can exit by pressing ESC. In each frame we clear and update the screen and draw everything.
 
