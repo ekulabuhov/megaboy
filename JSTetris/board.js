@@ -20,16 +20,6 @@ game.board.posEnum = {
 };
 
 game.board.board = [[]];
-game.board.screenHeight = 0;
-
-game.Board = function (screenHeight) {
-	game.board.screenHeight = screenHeight;
-	//game.initBoard();
-}
-
-game.Board.prototype.initBoard = function () {
-	return window.height;
-}
 
 /**
 * Init the board blocks with free positions
@@ -96,7 +86,7 @@ game.board.getXPosInPixels = function (pos) {
 };
 
 game.board.getYPosInPixels = function (pos) {
-	return ((mScreenHeight - (this.BLOCK_SIZE * this.BOARD_HEIGHT)) + (pos * this.BLOCK_SIZE));
+	return ((game.io.getScreenHeight() - (this.BLOCK_SIZE * this.BOARD_HEIGHT)) + (pos * this.BLOCK_SIZE));
 };
 
 game.board.isPossibleMovement = function (x, y, piece, rotation) {
