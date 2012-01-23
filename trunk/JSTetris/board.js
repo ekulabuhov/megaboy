@@ -69,11 +69,11 @@ game.board.deletePossibleLines = function () {
 	for (var j = 0; j < this.BOARD_HEIGHT; j++) {
 		var i = 0;
 		while (i < this.BOARD_WIDTH) {
-			if (mBoard[i][j] != this.posEnum.POS_FILLED) break;
+			if (this.board[i][j] != this.posEnum.POS_FILLED) break;
 			i++;
 		}
 
-		if (i == this.BOARD_WIDTH) this.DeleteLine(j);
+		if (i == this.BOARD_WIDTH) this.deleteLine(j);
 	}
 };
 
