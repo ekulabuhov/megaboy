@@ -21,16 +21,54 @@ game.main.run = function () {
 	// Get the actual clock milliseconds
 	var time1 = new Date().getTime();
 
-	//This is the main loop. We can exit by pressing ESC. In each frame we clear and update the screen and draw everything.
+	this.timer = setTimeout("game.main.loop()", game.WAIT_TIME);
+};
 
-	while (game.io.isKeyDown("esc") == false) {
-		// ----- Draw -----
-		game.io.clearScreen(); // Clear screen
-		game.drawScene();	 // Draw staff
-		game.io.updateScreen ();	 // Put the graphic context in the screen
+game.main.loop = function() {
+	//This is the main loop. We can exit by pressing ESC. In each frame we clear and update the screen and draw everything.
+	this.timer = setTimeout("game.main.loop()", game.WAIT_TIME);
+		
+	// ----- Draw -----
+	game.io.clearScreen(); // Clear screen
+	game.drawScene();	 // Draw staff
+	game.io.updateScreen ();	 // Put the graphic context in the screen
+	
+	//We start with the input. If we press left, down or right we try to move the piece in that directions. We only move the piece if the movement is possible.	
+	// ----- Input -----
+	if (game.io.isKeyDown("right")) 
+		if (game.board.isPossibleMovement (game.posX + 1, game.posY, game.piece, game.rotation))
+			game.posX++;
+	
+	// ----- Vertical movement -----
+
+	if (game.board.isPossibleMovement (game.posX, game.posY + 1, game.piece, game.rotation))
+	{
+		game.posY++;
+	}
+	else
+	{
+		game.board.storePiece (game.posX, game.posY, game.piece, game.rotation);
+
+		game.board.deletePossibleLines ();
+
+		if (game.board.isGameOver())
+		{
+			//mIO.Getkey();
+			//exit(0);
+			return;
+		}
+
+		game.createNewPiece();
 	}
 };
 
+document.addEventListener('keydown', function() {
+	if (game.io.isKeyDown("esc")) 
+	{
+		clearTimeout(game.main.timer);
+		console.log("ESCaped game");
+	}
+});
 
 
 //This is the main loop. We can exit by pressing ESC. In each frame we clear and update the screen and draw everything.

@@ -2,8 +2,8 @@
 goog.require('goog.graphics');
 
 window.onload = function () {
-	game.io.graphics = goog.graphics.createSimpleGraphics(window.innerWidth, window.innerHeight);
-	game.io.graphics.render(document.getElementById('shapes'));
+	game.io.graphics = goog.graphics.createSimpleGraphics('100%', '100%');
+	game.io.graphics.render(document.getElementById());
 };
 
 game.io.getScreenHeight = function () {
